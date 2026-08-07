@@ -13,7 +13,7 @@
     --sand:#e9dfc4;
     --text-dark:#241d13;
     --text-light:#f3ecd9;
-    --text-muted:#c3b797;   /* lightened for AA contrast on --ink */
+    --text-muted:#c3b797;
     --brass:#b3823f;
     --brass-bright:#e0ab63;
     --order:#7387b3;
@@ -70,7 +70,7 @@
     display:flex;
     flex-wrap:wrap;
     gap:12px;
-    margin:24px 0 16px;
+    margin:24px 0 10px;
     padding:16px;
     background:rgba(255,255,255,0.04);
     border:1px solid var(--line);
@@ -103,6 +103,30 @@
     background:var(--ink-2);
     color:var(--text-light);
   }
+
+  .preset-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:0 0 16px;
+    padding:12px 16px;
+    background:rgba(193,90,90,0.1);
+    border:1px solid rgba(193,90,90,0.4);
+    border-radius:6px;
+  }
+  .preset-row input[type="checkbox"]{
+    width:18px; height:18px;
+    accent-color:var(--combat);
+    flex:none;
+  }
+  .preset-row label{
+    font-size:13.5px;
+    line-height:1.5;
+    color:var(--text-light);
+  }
+  .preset-row .preset-title{ font-weight:600; }
+  .preset-row .preset-desc{ display:block; font-size:12px; color:var(--text-muted); margin-top:2px; }
+  .preset-row.disabled{ opacity:0.5; }
 
   .roll-btn{
     display:block;
@@ -166,9 +190,7 @@
     border-radius:20px;
   }
 
-  .field{
-    margin-bottom:12px;
-  }
+  .field{ margin-bottom:12px; }
   .field:last-child{ margin-bottom:0; }
   .field-head{
     display:flex;
@@ -183,9 +205,24 @@
     text-transform:uppercase;
     color:#5d4d30;
   }
+  .field-note{
+    font-size:11px;
+    color:#7a6a45;
+    font-style:italic;
+  }
   .field-val{ font-size:14.5px; line-height:1.55; }
   .field-val ul{ margin:4px 0 0; padding-left:18px; }
   .field-val li{ margin-bottom:3px; }
+  .field-val input[type="text"]{
+    width:100%;
+    border:1.5px solid rgba(36,29,19,0.35);
+    border-radius:4px;
+    padding:8px 10px;
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    background:rgba(255,255,255,0.5);
+    color:var(--text-dark);
+  }
 
   .die-btn{
     flex:none;
@@ -203,14 +240,12 @@
   }
   .die-btn:hover{ background:rgba(184,135,79,0.22); }
   .die-btn:active{ transform:rotate(20deg) scale(0.95); }
+  .die-btn[hidden]{ display:none; }
 
   .branch-row{ margin-bottom:5px; }
   .branch-tag{ font-weight:700; text-transform:uppercase; font-size:11px; letter-spacing:0.06em; margin-right:6px; }
 
-  .setup-note{
-    font-size:14px;
-    line-height:1.6;
-  }
+  .setup-note{ font-size:14px; line-height:1.6; }
   .setup-preview{
     margin-top:8px;
     padding:10px 12px;
@@ -222,7 +257,6 @@
     line-height:1.5;
   }
 
-  /* Announcement section (bottom) */
   .announce{
     background:rgba(224,171,99,0.12);
     border:1.5px solid var(--brass);
@@ -230,11 +264,7 @@
     padding:18px;
     margin-top:6px;
   }
-  .announce h2{
-    font-family:'Cinzel', serif;
-    font-size:16px;
-    margin:0 0 10px;
-  }
+  .announce h2{ font-family:'Cinzel', serif; font-size:16px; margin:0 0 10px; }
   .badge-row{ display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
   .badge{
     font-family:'IBM Plex Mono', monospace;
@@ -247,18 +277,8 @@
     border:1.5px solid;
     color:var(--text-dark);
   }
-  .announce-text{
-    font-family:'Cinzel', serif;
-    font-size:18.5px;
-    line-height:1.6;
-    margin-bottom:14px;
-  }
-  .start-time-field{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    margin-top:10px;
-  }
+  .announce-text{ font-family:'Cinzel', serif; font-size:18.5px; line-height:1.6; margin-bottom:14px; }
+  .start-time-field{ display:flex; align-items:center; gap:8px; margin-top:10px; }
   .start-time-field label{
     font-family:'IBM Plex Mono', monospace;
     font-size:10.5px;
@@ -276,12 +296,7 @@
     background:rgba(255,255,255,0.5);
     color:var(--text-dark);
   }
-  .meta-line{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:12.5px;
-    color:#5d4d30;
-    margin-top:10px;
-  }
+  .meta-line{ font-family:'IBM Plex Mono', monospace; font-size:12.5px; color:#5d4d30; margin-top:10px; }
 
   .copy-btn{
     display:block;
@@ -316,9 +331,7 @@
     line-height:1.6;
   }
 
-  @media (prefers-reduced-motion: reduce){
-    *{ transition:none !important; }
-  }
+  @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
 </style>
 </head>
 <body>
@@ -359,6 +372,15 @@
       </select>
     </div>
   </form>
+
+  <div class="preset-row" id="presetRow">
+    <input type="checkbox" id="demolition">
+    <label for="demolition">
+      <span class="preset-title">Build Demolition preset (Combat only)</span>
+      <span class="preset-desc">Location becomes manual entry, Reward locks to wreckage loot, Branches are flavor only — the build comes down regardless.</span>
+    </label>
+  </div>
+
   <button class="roll-btn" id="rollAll" type="button">🎲 Roll New Event</button>
 
   <div class="card">
@@ -383,12 +405,22 @@
         <div class="field-val" id="h_premise"></div>
       </div>
       <div class="field">
-        <div class="field-head"><span class="field-cat">Location</span><button class="die-btn" data-key="location" aria-label="Reroll location">🎲</button></div>
+        <div class="field-head"><span class="field-cat" id="locationLabel">Location</span><button class="die-btn" data-key="location" id="locationDie" aria-label="Reroll location">🎲</button></div>
         <div class="field-val" id="h_location"></div>
+        <div class="field-val" id="h_locationManual" style="display:none;">
+          <input type="text" id="locationManualInput" placeholder="Type the build's actual location">
+        </div>
       </div>
       <div class="field">
         <div class="field-head"><span class="field-cat">Personae Dramatis</span><button class="die-btn" data-key="cast" aria-label="Reroll cast">🎲</button></div>
         <div class="field-val" id="h_cast"></div>
+      </div>
+      <div class="field">
+        <div class="field-head">
+          <span class="field-cat">Item <span class="field-note">(optional — use if the scene calls for one)</span></span>
+          <button class="die-btn" data-key="item" aria-label="Reroll item">🎲</button>
+        </div>
+        <div class="field-val" id="h_item"></div>
       </div>
     </section>
 
@@ -399,12 +431,8 @@
         <span class="phase-time" id="t-main"></span>
       </div>
       <div class="field">
-        <div class="field-head"><span class="field-cat">Objective</span><button class="die-btn" data-key="objective" aria-label="Reroll objective">🎲</button></div>
-        <div class="field-val" id="h_objective"></div>
-      </div>
-      <div class="field">
-        <div class="field-head"><span class="field-cat">Antagonist</span><button class="die-btn" data-key="antagonist" aria-label="Reroll antagonist">🎲</button></div>
-        <div class="field-val" id="h_antagonist"></div>
+        <div class="field-head"><span class="field-cat">Key Figure</span><button class="die-btn" data-key="keyfigure" aria-label="Reroll key figure">🎲</button></div>
+        <div class="field-val" id="h_keyfigure"></div>
       </div>
     </section>
 
@@ -427,7 +455,10 @@
         <span class="phase-time" id="t-resolution"></span>
       </div>
       <div class="field">
-        <div class="field-head"><span class="field-cat">Branches</span><button class="die-btn" data-key="branch" aria-label="Reroll branches">🎲</button></div>
+        <div class="field-head">
+          <span class="field-cat">Branches <span class="field-note" id="branchNote" style="display:none;">(flavor only — the outcome is fixed)</span></span>
+          <button class="die-btn" data-key="branch" aria-label="Reroll branches">🎲</button>
+        </div>
         <div class="field-val" id="h_branch"></div>
       </div>
     </section>
@@ -439,7 +470,7 @@
         <span class="phase-time" id="t-wrapup"></span>
       </div>
       <div class="field">
-        <div class="field-head"><span class="field-cat">Reward (OOC)</span><button class="die-btn" data-key="reward" aria-label="Reroll reward">🎲</button></div>
+        <div class="field-head"><span class="field-cat">Reward (OOC)</span><button class="die-btn" data-key="reward" id="rewardDie" aria-label="Reroll reward">🎲</button></div>
         <div class="field-val" id="h_reward"></div>
       </div>
     </section>
@@ -462,7 +493,7 @@
     </div>
   </div>
 
-  <footer>Content pools are a starting set for staff feedback — reroll freely and flag anything that reads off-tone or off-lore.</footer>
+  <footer>Content pools reflect the latest review pass — reroll freely and flag anything that still reads off-tone or off-lore.</footer>
 </div>
 
 <script>
@@ -484,33 +515,54 @@ const DURATION_VALUES = [60,120,180];
 const TRIGGER = {
   order: [
     "A soldier has broken oath and fled into the sands",
-    "Temple rites have been disturbed by an unknown hand",
+    "Someone has vandalized the temple mid-ceremony",
     "A shipment of tribute has gone missing before it reached the garrison",
-    "An old law is being tested, and the officers demand it enforced",
+    "A merchant is refusing to pay a toll they say is unfair",
     "A prisoner has escaped the holding cells",
-    "Word arrives that a rival town mocks Khas Khemi's discipline",
+    "Two citizens have called a ritual duel, and someone is needed to keep it fair",
     "The granary reports theft from within its own walls",
-    "A ritual duel has been called, and witnesses are needed"
+    "A guard has gone missing on patrol",
+    "Someone has been collecting \"fines\" that don't officially exist",
+    "A caravan under Khas Khemi's protection is overdue and hasn't been heard from",
+    "A brawl broke out during a public ceremony",
+    "Someone is forging papers to slip past checkpoints unnoticed",
+    "A dispute between two households has turned to threats",
+    "A supply run to an outlying post has gone quiet",
+    "A captured raider is being questioned, and the questioning is turning ugly"
   ],
   knowledge: [
     "A scholar has unearthed something better left buried",
-    "An expedition has gone silent in the ruins nearby",
+    "An expedition into the ruins has gone silent",
     "A relic thought lost has surfaced in the wrong hands",
-    "Forbidden texts have been stolen from the archive",
-    "A cult ritual has been sighted beyond the walls",
-    "Two rival scholars accuse each other of theft",
-    "An ancient seal has cracked, and something stirs",
-    "A merchant offers knowledge no one should sell"
+    "Forbidden texts have gone missing from the archive",
+    "A cult ritual has been sighted near the walls",
+    "Two scholars accuse each other of stealing research",
+    "An old seal has cracked open, and something's stirring",
+    "A merchant is offering knowledge that shouldn't be for sale",
+    "A researcher has gone missing chasing a lead alone",
+    "A find is about to ship out under a false name",
+    "Two apprentices are feuding over credit for a discovery",
+    "A vault thought sealed for good has been opened from the inside",
+    "A traveling collector wants access to something not meant to leave",
+    "A find is drawing unfriendly attention",
+    "A message in a dead language has been intercepted"
   ],
   freedom: [
     "Mama-san's tithe collectors have come up short",
     "A rival crew has moved in on the docks",
-    "A smuggler's cargo has vanished before the buyer arrived",
+    "A shipment has vanished before the buyer arrived",
     "A debt has come due, and the debtor has vanished",
     "Pirates have been spotted near the harbor",
-    "A bar brawl has spilled into something bigger",
-    "A stranger is asking too many questions about the wrong people",
-    "A gambling ring has been caught cheating the wrong patron"
+    "A bar brawl has spilled into the street",
+    "A stranger has been asking too many questions about the wrong people",
+    "A gambling ring has been caught cheating a patron who won't let it go",
+    "Someone is selling fake goods under a trusted name",
+    "A smuggler needs a hand moving cargo before the tide turns",
+    "A crew member has gone missing after a job",
+    "Two crews are about to come to blows over territory",
+    "A newcomer has been robbed on their first night in town",
+    "A trusted face has been spotted somewhere they shouldn't be",
+    "A bounty has been posted for someone who hasn't actually done anything wrong"
   ],
   generic: [
     "Something has gone wrong, and no one else is nearby to deal with it",
@@ -518,7 +570,11 @@ const TRIGGER = {
     "Trouble has found its way here, as it always does",
     "A call for aid has gone out, with little explanation given",
     "Something has been stolen, and someone wants it back",
-    "A dispute has escalated further than anyone intended"
+    "A dispute has escalated further than anyone intended",
+    "Someone has gone missing, and no one's looking for them but you",
+    "A stranger needs an escort somewhere they won't say why",
+    "A rumor is spreading fast, and no one can confirm where it started",
+    "Something valuable has been found, and more than one person wants it"
   ]
 };
 
@@ -531,6 +587,21 @@ const STAKES = [
   "before the wrong people find out first",
   "or the cost will fall on people who had nothing to do with it",
   "before the trail goes cold"
+];
+
+const ITEM_DESC = ["tarnished","black iron","obsidian","bone-white","gilded","rust-eaten","weather-worn","verdigris-streaked","blood-dark","sun-bleached"];
+const ITEM_OBJ = ["idol","dagger","mask","ring","tablet","urn","seal","amulet","scroll case","crown fragment"];
+const ITEM_PROP = [
+  "that hums faintly when touched",
+  "said to predate the Cataclysm",
+  "etched in a script no scholar can read",
+  "warm to the touch though it shouldn't be",
+  "that whispers if held too long",
+  "marked with a symbol no faction claims",
+  "that no flame will burn",
+  "rumored to be cursed, though nothing's proven",
+  "said to have belonged to a forgotten king",
+  "that draws insects no matter the season"
 ];
 
 const LOCATION = [
@@ -546,15 +617,21 @@ const LOCATION = [
   "a shrine no longer tended"
 ];
 
-const ANTAGONIST = [
-  "a corrupt official abusing their post",
-  "a rival gang leader looking to expand",
-  "a cultist pursuing a forbidden rite",
-  "a mercenary captain paid to cause trouble",
-  "a smuggler protecting their cargo",
-  "a disgraced noble seeking to reclaim status",
-  "a beast stirred from its den",
-  "an informant playing both sides"
+const KEYFIGURE = [
+  "A hardened mercenary, clearly used to rough work",
+  "A weathered traveler who's been on the road a long while",
+  "Someone in guard's colors, though something about them feels off",
+  "A well-dressed stranger who doesn't quite fit the surroundings",
+  "A hooded figure keeping to the edges of the scene",
+  "A local face everyone in town seems to recognize",
+  "Someone carrying more coin than they probably should",
+  "A person who flinches at any mention of the law",
+  "Someone with old scars and a name that doesn't quite match their story",
+  "A person who talks fast and won't quite meet your eyes",
+  "Someone who keeps checking over their shoulder",
+  "A stranger who clearly knows more than they're letting on",
+  "Someone dressed for a fight they didn't expect to have",
+  "A person the rest of town seems to quietly avoid"
 ];
 
 const CAST_POOL = [
@@ -570,26 +647,22 @@ const CAST_POOL = [
   "a rival adventurer with their own agenda"
 ];
 
-const OBJECTIVE = [
-  "Retrieve what was taken before it changes hands",
-  "Escort someone safely to their destination",
-  "Investigate the disturbance and report back",
-  "Negotiate a resolution before it turns violent",
-  "Hold a position until reinforcements arrive",
-  "Track down whoever is responsible",
-  "Recover the missing cargo, relic, or prisoner",
-  "Broker peace between the two sides"
-];
-
 const COMPLICATION = [
-  "A storm rolls in, cutting visibility and time short",
-  "A third party arrives, uninvited and unhelpful",
-  "The situation isn't what it first appeared to be",
-  "Reinforcements — for the other side — show up early",
-  "Someone the players trusted turns out to have their own agenda",
-  "The location itself turns dangerous — fire, collapse, or flood",
-  "Word spreads faster than expected, drawing unwanted attention",
-  "The deadline moves up unexpectedly"
+  "A storm rolls in, cutting visibility and forcing everyone to move faster",
+  "A second group shows up chasing the same goal, and they don't want to share",
+  "The person who asked for help turns out to have started the trouble themselves",
+  "Reinforcements — for the other side — arrive earlier than expected",
+  "One of the NPCs helping the players is quietly stalling, or pocketing something along the way",
+  "The location turns dangerous mid-scene — fire, collapse, or flood",
+  "A crowd gathers to watch, and now there are witnesses who won't leave",
+  "The deadline moves up without warning — less time than promised",
+  "The objective is better guarded or better hidden than expected",
+  "Someone spots the players doing something they shouldn't, and now they're being watched",
+  "The way back is blocked, and the only route out is longer and riskier",
+  "Something breaks or is damaged mid-task, with no easy fix on hand",
+  "A bystander gets caught in the middle and can't be ignored or left behind",
+  "The target isn't alone — someone unexpected is with them",
+  "A rival group is already on-site, working the same problem from a different angle"
 ];
 
 const BRANCH_SETS = [
@@ -610,6 +683,8 @@ const REWARD = [
   "Bonus payout if resolved within the time-box",
   "A relic or curio with no mechanical effect, just flavor"
 ];
+
+const DEMOLITION_REWARD = "Loot from the wreckage — players may take what's left standing.";
 
 const PHASE_SPLIT = [
   {key:"setup", label:"Setup", pct:0.08},
@@ -647,6 +722,13 @@ function resolveDuration(){
   const v = document.getElementById('duration').value;
   return v === 'random' ? pick(DURATION_VALUES) : parseInt(v, 10);
 }
+function isDemolition(){
+  return document.getElementById('demolition').checked && state.bucket === 'combat';
+}
+
+function rollItem(){
+  return { desc: pick(ITEM_DESC), obj: pick(ITEM_OBJ), prop: pick(ITEM_PROP) };
+}
 
 function rollAll(){
   state.faction = resolveFaction();
@@ -655,9 +737,10 @@ function rollAll(){
   state.trigger = pick(TRIGGER[state.faction]);
   state.stakes = pick(STAKES);
   state.location = pick(LOCATION);
-  state.antagonist = pick(ANTAGONIST);
+  state.locationManual = "";
+  state.keyfigure = pick(KEYFIGURE);
   state.cast = pickN(CAST_POOL, BUCKET_META[state.bucket].castSize);
-  state.objective = pick(OBJECTIVE);
+  state.item = rollItem();
   state.complication = pick(COMPLICATION);
   state.branch = pick(BRANCH_SETS);
   state.reward = pick(REWARD);
@@ -667,9 +750,9 @@ function rollAll(){
 function rerollField(key){
   switch(key){
     case "location": state.location = pick(LOCATION); break;
-    case "antagonist": state.antagonist = pick(ANTAGONIST); break;
+    case "keyfigure": state.keyfigure = pick(KEYFIGURE); break;
     case "cast": state.cast = pickN(CAST_POOL, BUCKET_META[state.bucket].castSize); break;
-    case "objective": state.objective = pick(OBJECTIVE); break;
+    case "item": state.item = rollItem(); break;
     case "complication": state.complication = pick(COMPLICATION); break;
     case "branch": state.branch = pick(BRANCH_SETS); break;
     case "reward": state.reward = pick(REWARD); break;
@@ -679,6 +762,17 @@ function rerollField(key){
 
 function premiseSentence(){
   return `${cap(state.trigger)}, ${state.stakes}.`;
+}
+function itemSentence(){
+  return `A ${state.item.desc} ${state.item.obj} ${state.item.prop}.`;
+}
+function locationText(){
+  const demo = isDemolition();
+  if(demo) return state.locationManual && state.locationManual.trim() ? state.locationManual.trim() : "(location not yet entered)";
+  return cap(state.location);
+}
+function rewardText(){
+  return isDemolition() ? DEMOLITION_REWARD : (cap(state.reward) + '.');
 }
 
 function timebox(mins){
@@ -700,31 +794,49 @@ function timebox(mins){
 function render(){
   const fMeta = FACTION_META[state.faction];
   const bMeta = BUCKET_META[state.bucket];
+  const demo = isDemolition();
+
+  // Preset row enable/disable
+  const presetRow = document.getElementById('presetRow');
+  presetRow.classList.toggle('disabled', state.bucket !== 'combat');
+  document.getElementById('demolition').disabled = state.bucket !== 'combat';
 
   // Announcement
   document.getElementById('publicBadges').innerHTML = `
     <span class="badge" style="border-color:${fMeta.color}">${fMeta.name}</span>
     <span class="badge" style="border-color:${bMeta.color}">${bMeta.name}</span>
+    ${demo ? '<span class="badge" style="border-color:var(--combat)">Build Demolition</span>' : ''}
   `;
   document.getElementById('publicText').textContent = `${premiseSentence()} ${bMeta.tail}`;
-  document.getElementById('publicLocation').textContent = `📍 ${cap(state.location)}`;
+  document.getElementById('publicLocation').textContent = `📍 ${locationText()}`;
 
-  // Setup preview mirrors announcement
-  document.getElementById('setupPreview').textContent = `"${premiseSentence()} ${bMeta.tail}" — ${cap(state.location)}`;
+  document.getElementById('setupPreview').textContent = `"${premiseSentence()} ${bMeta.tail}" — ${locationText()}`;
 
   // Intro
   document.getElementById('h_premise').textContent = premiseSentence();
-  document.getElementById('h_location').textContent = cap(state.location);
+
+  document.getElementById('locationLabel').textContent = demo ? "Location (manual)" : "Location";
+  document.getElementById('locationDie').hidden = demo;
+  document.getElementById('h_location').style.display = demo ? 'none' : '';
+  document.getElementById('h_locationManual').style.display = demo ? '' : 'none';
+  if(demo && document.getElementById('locationManualInput').value !== state.locationManual){
+    document.getElementById('locationManualInput').value = state.locationManual;
+  }
+  if(!demo){
+    document.getElementById('h_location').textContent = cap(state.location);
+  }
+
   document.getElementById('h_cast').innerHTML = '<ul>' + state.cast.map(c=>`<li>${cap(c)}</li>`).join('') + '</ul>';
+  document.getElementById('h_item').textContent = itemSentence();
 
   // Main action
-  document.getElementById('h_objective').textContent = state.objective + '.';
-  document.getElementById('h_antagonist').textContent = cap(state.antagonist);
+  document.getElementById('h_keyfigure').textContent = state.keyfigure + '.';
 
   // Complication
   document.getElementById('h_complication').textContent = state.complication + '.';
 
   // Resolution
+  document.getElementById('branchNote').style.display = demo ? '' : 'none';
   document.getElementById('h_branch').innerHTML = `
     <div class="branch-row"><span class="branch-tag" style="color:#2e5c4c;">Success</span>${state.branch.success}</div>
     <div class="branch-row"><span class="branch-tag" style="color:#6d5a1c;">Partial</span>${state.branch.partial}</div>
@@ -732,9 +844,10 @@ function render(){
   `;
 
   // Wrap-up
-  document.getElementById('h_reward').textContent = cap(state.reward) + '.';
+  document.getElementById('rewardDie').hidden = demo;
+  document.getElementById('h_reward').textContent = rewardText();
 
-  // Time-box, woven into phase headers
+  // Time-box
   const tb = timebox(state.duration);
   tb.forEach(p=>{
     const el = document.getElementById('t-'+p.key);
@@ -745,32 +858,33 @@ function render(){
 function buildPublicCopyText(){
   const bMeta = BUCKET_META[state.bucket];
   const startTime = document.getElementById('startTime').value.trim() || "soon";
-  return `Impromptu Event: ${premiseSentence()} ${bMeta.tail}\nStarting in ${startTime} — ${cap(state.location)}.`;
+  return `Impromptu Event: ${premiseSentence()} ${bMeta.tail}\nStarting in ${startTime} — ${locationText()}.`;
 }
 
 function buildHelperCopyText(){
   const tb = timebox(state.duration);
   const timeFor = key => tb.find(p=>p.key===key).val;
+  const demo = isDemolition();
   return [
-    `EVENT: ${FACTION_META[state.faction].name} / ${BUCKET_META[state.bucket].name} / ${state.duration} min total`,
+    `EVENT: ${FACTION_META[state.faction].name} / ${BUCKET_META[state.bucket].name}${demo ? ' / Build Demolition' : ''} / ${state.duration} min total`,
     ``,
     `1. SETUP (${timeFor('setup')}m) — Post the announcement.`,
     `2. INTRO (${timeFor('intro')}m)`,
     `   Premise: ${premiseSentence()}`,
-    `   Location: ${cap(state.location)}`,
+    `   Location: ${locationText()}`,
     `   Personae Dramatis:`,
     ...state.cast.map(c=>`     - ${cap(c)}`),
+    `   Item (optional): ${itemSentence()}`,
     `3. MAIN ACTION (${timeFor('main')}m)`,
-    `   Objective: ${state.objective}.`,
-    `   Antagonist: ${cap(state.antagonist)}`,
+    `   Key Figure: ${state.keyfigure}.`,
     `4. COMPLICATION (${timeFor('complication')}m)`,
     `   ${state.complication}.`,
-    `5. RESOLUTION (${timeFor('resolution')}m)`,
+    `5. RESOLUTION (${timeFor('resolution')}m)${demo ? ' — flavor only, outcome fixed' : ''}`,
     `   Success: ${state.branch.success}`,
     `   Partial: ${state.branch.partial}`,
     `   Failure: ${state.branch.failure}`,
     `6. WRAP-UP (${timeFor('wrapup')}m)`,
-    `   Reward: ${cap(state.reward)}.`
+    `   Reward: ${rewardText()}`
   ].join('\n');
 }
 
@@ -781,10 +895,26 @@ function flashConfirm(el, msg){
 
 document.getElementById('rollAll').addEventListener('click', rollAll);
 document.getElementById('faction').addEventListener('change', ()=>{ if(document.getElementById('faction').value !== 'random') rollAll(); });
-document.getElementById('bucket').addEventListener('change', ()=>{ if(document.getElementById('bucket').value !== 'random') rollAll(); });
+document.getElementById('bucket').addEventListener('change', ()=>{
+  if(document.getElementById('bucket').value !== 'combat'){
+    document.getElementById('demolition').checked = false;
+  }
+  if(document.getElementById('bucket').value !== 'random') rollAll();
+});
 document.getElementById('duration').addEventListener('change', ()=>{
   const v = document.getElementById('duration').value;
   if(v !== 'random'){ state.duration = parseInt(v,10); render(); }
+});
+document.getElementById('demolition').addEventListener('change', ()=>{
+  if(document.getElementById('demolition').checked){
+    document.getElementById('bucket').value = 'combat';
+    state.bucket = 'combat';
+  }
+  render();
+});
+document.getElementById('locationManualInput').addEventListener('input', (e)=>{
+  state.locationManual = e.target.value;
+  render();
 });
 
 document.querySelectorAll('.die-btn').forEach(btn=>{
