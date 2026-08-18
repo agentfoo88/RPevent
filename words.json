@@ -1,0 +1,14 @@
+{
+  "adventure": {
+    "r": ["Rogue", "Reckless", "Ravaged", "Raider", "Restless", "Ruin", "Ruins", "Rebel", "Ranger", "Reaver", "Renegade", "Riven", "Ravenous", "Rampant", "Roaming", "Ragged", "Rift", "Rove", "Roving", "Road", "Realm", "River", "Rugged", "Rimward"],
+    "p": ["Path", "Paths", "Plunder", "Pilgrim", "Prowl", "Peril", "Passage", "Pirate", "Pursuit", "Provenance", "Pact", "Portal", "Pioneer", "Pilgrimage", "Pinnacle", "Plains", "Precipice", "Prowess", "Pathfinder", "Pillage"]
+  },
+  "sensuality": {
+    "r": ["Ravish", "Ravishing", "Rapture", "Rapturous", "Rouge", "Reverie", "Rendezvous", "Radiant", "Ravening", "Ripe", "Requited", "Rosewood"],
+    "p": ["Pleasure", "Pleasures", "Paramour", "Persuasion", "Passion", "Passions", "Provocation", "Paradise", "Petal", "Perfume", "Pulse", "Primal", "Poison"]
+  },
+  "myth": {
+    "r": ["Relic", "Rite", "Requiem", "Rune", "Runes", "Reliquary", "Revenant", "Ritual", "Raven", "Riddle"],
+    "p": ["Prophecy", "Pantheon", "Providence", "Phantom", "Portent", "Priestess", "Pyre", "Primordial", "Psalm"]
+  }
+}

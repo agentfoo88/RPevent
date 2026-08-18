@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>R&P Name Forge</title>
+<style>
+  :root {
+    --bg: #14100d;
+    --bg-panel: #1e1712;
+    --border: #3a2e22;
+    --gold: #c9a75f;
+    --gold-bright: #e8c77e;
+    --text: #e8ddc9;
+    --text-dim: #9c8f78;
+    --red: #8a2c2c;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(ellipse at top, #241b13 0%, var(--bg) 60%);
+    color: var(--text);
+    font-family: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+    display: flex;
+    justify-content: center;
+    padding: 32px 16px 60px;
+  }
+
+  .forge { width: 100%; max-width: 640px; }
+
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.35em;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 30px;
+    font-weight: 400;
+    margin: 0 0 4px;
+    color: var(--gold-bright);
+  }
+
+  .sub {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 14px;
+    margin-bottom: 28px;
+    font-style: italic;
+  }
+
+  .filters {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+
+  .filter-chip {
+    font-size: 12px;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 999px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: transparent;
+  }
+  .filter-chip.active {
+    border-color: var(--gold);
+    color: var(--gold-bright);
+    background: rgba(201, 167, 95, 0.08);
+  }
+
+  .results {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .result-row {
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--bg-panel), #17120d);
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .result-row .name { font-size: 22px; }
+  .result-row .name .r-word,
+  .result-row .name .p-word { color: var(--gold-bright); }
+  .result-row .name .connector { color: var(--text-dim); font-size: 15px; padding: 0 8px; }
+  .result-row .tag {
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  .add-btn {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--gold);
+    background: transparent;
+    color: var(--gold-bright);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .add-btn:hover { background: var(--gold); color: #1a140e; }
+  .add-btn.added { border-color: var(--text-dim); color: var(--text-dim); cursor: default; }
+  .add-btn.added:hover { background: transparent; color: var(--text-dim); }
+
+  .controls { display: flex; gap: 10px; justify-content: center; margin-bottom: 36px; }
+
+  button.primary {
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid var(--red);
+    background: var(--red);
+    color: var(--text);
+    padding: 12px 26px;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  button.primary:hover { background: #a83737; }
+
+  .panel { border-top: 1px solid var(--border); padding-top: 20px; margin-bottom: 28px; }
+
+  .panel h2 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    font-weight: 400;
+    margin: 0 0 12px;
+  }
+
+  .shortlist-scroll {
+    max-height: 220px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-right: 4px;
+    margin: 0;
+  }
+
+  .shortlist-scroll li {
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    padding: 8px 12px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+  }
+
+  .shortlist-scroll .remove {
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 12px;
+    border: none;
+    background: none;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .shortlist-scroll .remove:hover { color: var(--red); }
+
+  .empty { color: var(--text-dim); font-size: 13px; font-style: italic; text-align: center; padding: 12px 0; }
+
+  .add-word-form { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+  .add-word-form select,
+  .add-word-form input {
+    font-family: inherit;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 9px 10px;
+    font-size: 14px;
+  }
+
+  .add-word-form input { flex: 1; min-width: 120px; }
+
+  .add-word-form button {
+    font-family: inherit;
+    cursor: pointer;
+    border: 1px solid var(--gold);
+    background: transparent;
+    color: var(--gold-bright);
+    padding: 9px 16px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .add-word-form button:hover { background: var(--gold); color: #1a140e; }
+
+  .export-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+  .export-row p { font-size: 12px; color: var(--text-dim); margin: 0; max-width: 380px; }
+
+  .status { font-size: 11px; color: var(--text-dim); text-align: center; margin-top: -12px; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+
+<div class="forge">
+  <div class="eyebrow">Rogue Pleasures &middot; Working Title Tool</div>
+  <h1>R &amp; P Name Forge</h1>
+  <div class="sub">strike words together, see what catches fire</div>
+
+  <div class="filters" id="filters"></div>
+  <div class="status" id="loadStatus">Loading word pools&hellip;</div>
+
+  <div class="results" id="results"></div>
+
+  <div class="controls">
+    <button class="primary" id="rollBtn">Forge 5 Names</button>
+  </div>
+
+  <div class="panel">
+    <h2>Shortlist</h2>
+    <ul class="shortlist-scroll" id="shortlist"></ul>
+  </div>
+
+  <div class="panel">
+    <h2>Add a Word Manually</h2>
+    <div class="add-word-form">
+      <select id="wordLetter">
+        <option value="r">R word</option>
+        <option value="p">P word</option>
+      </select>
+      <select id="wordTheme"></select>
+      <input type="text" id="wordInput" placeholder="Type a word&hellip;">
+      <button id="addWordBtn">Add</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Save Word List</h2>
+    <div class="export-row">
+      <p>Downloads the current word pool (defaults + anything you added) as words.json. Commit that file to your GitHub Pages repo to make additions permanent.</p>
+      <button class="primary" id="exportBtn">Download words.json</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const DEFAULT_WORDS = {
+    adventure: {
+      r: ["Rogue", "Reckless", "Ravaged", "Raider", "Restless", "Ruin", "Ruins", "Rebel", "Ranger", "Reaver", "Renegade", "Riven", "Ravenous", "Rampant", "Roaming", "Ragged", "Rift", "Rove", "Roving", "Road", "Realm", "River", "Rugged", "Rimward"],
+      p: ["Path", "Paths", "Plunder", "Pilgrim", "Prowl", "Peril", "Passage", "Pirate", "Pursuit", "Provenance", "Pact", "Portal", "Pioneer", "Pilgrimage", "Pinnacle", "Plains", "Precipice", "Prowess", "Pathfinder", "Pillage"]
+    },
+    sensuality: {
+      r: ["Ravish", "Ravishing", "Rapture", "Rapturous", "Rouge", "Reverie", "Rendezvous", "Radiant", "Ravening", "Ripe", "Requited", "Rosewood"],
+      p: ["Pleasure", "Pleasures", "Paramour", "Persuasion", "Passion", "Passions", "Provocation", "Paradise", "Petal", "Perfume", "Pulse", "Primal", "Poison"]
+    },
+    myth: {
+      r: ["Relic", "Rite", "Requiem", "Rune", "Runes", "Reliquary", "Revenant", "Ritual", "Raven", "Riddle"],
+      p: ["Prophecy", "Pantheon", "Providence", "Phantom", "Portent", "Priestess", "Pyre", "Primordial", "Psalm"]
+    }
+  };
+
+  const CONNECTORS = ["&", "of", "'s"];
+
+  let WORDS = JSON.parse(JSON.stringify(DEFAULT_WORDS));
+  let activeThemes = new Set(Object.keys(WORDS));
+  let shortlist = [];
+  let latestBatch = [];
+
+  const filtersEl = document.getElementById('filters');
+  const resultsEl = document.getElementById('results');
+  const shortlistEl = document.getElementById('shortlist');
+  const loadStatusEl = document.getElementById('loadStatus');
+  const wordThemeSelect = document.getElementById('wordTheme');
+
+  async function loadWords() {
+    try {
+      const res = await fetch('words.json', { cache: 'no-store' });
+      if (!res.ok) throw new Error('no file');
+      const data = await res.json();
+      WORDS = data;
+      activeThemes = new Set(Object.keys(WORDS));
+      loadStatusEl.textContent = 'Loaded words.json from this folder.';
+    } catch (e) {
+      loadStatusEl.textContent = 'Using built-in word list (words.json not found alongside this page).';
+    }
+    renderFilters();
+    renderThemeSelect();
+    roll();
+  }
+
+  function renderFilters() {
+    filtersEl.innerHTML = '';
+    Object.keys(WORDS).forEach(theme => {
+      const chip = document.createElement('button');
+      chip.className = 'filter-chip' + (activeThemes.has(theme) ? ' active' : '');
+      chip.textContent = theme;
+      chip.onclick = () => {
+        if (activeThemes.has(theme)) {
+          if (activeThemes.size > 1) activeThemes.delete(theme);
+        } else {
+          activeThemes.add(theme);
+        }
+        renderFilters();
+      };
+      filtersEl.appendChild(chip);
+    });
+  }
+
+  function renderThemeSelect() {
+    wordThemeSelect.innerHTML = '';
+    Object.keys(WORDS).forEach(theme => {
+      const opt = document.createElement('option');
+      opt.value = theme;
+      opt.textContent = theme;
+      wordThemeSelect.appendChild(opt);
+    });
+  }
+
+  function pick(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  function makeName() {
+    const themes = Array.from(activeThemes);
+    const rTheme = pick(themes);
+    const pTheme = pick(themes);
+    const rWord = pick(WORDS[rTheme].r);
+    const pWord = pick(WORDS[pTheme].p);
+    const connector = pick(CONNECTORS);
+    const tag = rTheme === pTheme ? rTheme : `${rTheme} + ${pTheme}`;
+    return { rWord, pWord, connector, tag };
+  }
+
+  function roll() {
+    latestBatch = Array.from({ length: 5 }, makeName);
+    renderResults();
+  }
+
+  function renderResults() {
+    resultsEl.innerHTML = '';
+    latestBatch.forEach((item) => {
+      const fullName = `${item.rWord} ${item.connector} ${item.pWord}`;
+      const row = document.createElement('div');
+      row.className = 'result-row';
+
+      const nameDiv = document.createElement('div');
+      nameDiv.innerHTML = `<span class="name"><span class="r-word">${item.rWord}</span><span class="connector">${item.connector}</span><span class="p-word">${item.pWord}</span></span><span class="tag">${item.tag}</span>`;
+
+      const addBtn = document.createElement('button');
+      const already = shortlist.includes(fullName);
+      addBtn.className = 'add-btn' + (already ? ' added' : '');
+      addBtn.textContent = already ? '\u2713' : '+';
+      addBtn.onclick = () => {
+        if (!shortlist.includes(fullName)) {
+          shortlist.unshift(fullName);
+          renderShortlist();
+          renderResults();
+        }
+      };
+
+      row.appendChild(nameDiv);
+      row.appendChild(addBtn);
+      resultsEl.appendChild(row);
+    });
+  }
+
+  function renderShortlist() {
+    shortlistEl.innerHTML = '';
+    if (shortlist.length === 0) {
+      const li = document.createElement('li');
+      li.className = 'empty';
+      li.style.background = 'transparent';
+      li.style.border = 'none';
+      li.textContent = 'Nothing shortlisted yet.';
+      shortlistEl.appendChild(li);
+      return;
+    }
+    shortlist.forEach((name, i) => {
+      const li = document.createElement('li');
+      const span = document.createElement('span');
+      span.textContent = name;
+      const btn = document.createElement('button');
+      btn.className = 'remove';
+      btn.textContent = 'remove';
+      btn.onclick = () => {
+        shortlist.splice(i, 1);
+        renderShortlist();
+        renderResults();
+      };
+      li.appendChild(span);
+      li.appendChild(btn);
+      shortlistEl.appendChild(li);
+    });
+  }
+
+  document.getElementById('rollBtn').addEventListener('click', roll);
+
+  document.getElementById('addWordBtn').addEventListener('click', () => {
+    const letter = document.getElementById('wordLetter').value;
+    const theme = wordThemeSelect.value;
+    const input = document.getElementById('wordInput');
+    const word = input.value.trim();
+    if (!word) return;
+    if (!WORDS[theme][letter].includes(word)) {
+      WORDS[theme][letter].push(word);
+    }
+    input.value = '';
+  });
+
+  document.getElementById('exportBtn').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(WORDS, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'words.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  renderShortlist();
+  loadWords();
+</script>
+
+</body>
+</html>
