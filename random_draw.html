@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Random Draw</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#141110; --ink-2:#1c1815;
+    --sand:#e9dfc4; --text-dark:#241d13; --text-light:#f3ecd9;
+    --text-muted:#c3b797; --brass:#b3823f; --brass-bright:#e0ab63;
+    --focus:#ffd77a; --line:rgba(243,236,217,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:radial-gradient(ellipse at top, var(--ink-2), var(--ink) 70%);
+    color:var(--text-light); font-family:'Inter', sans-serif; min-height:100vh; padding:28px 16px 60px;
+  }
+  .wrap{max-width:600px; margin:0 auto;}
+  header{text-align:center; margin-bottom:20px;}
+  h1{ font-family:'Cinzel', serif; font-weight:700; font-size:27px; margin:0 0 8px; }
+  .sub{ font-size:13.5px; color:var(--text-muted); line-height:1.6; }
+
+  a{color:var(--brass-bright);}
+  button:focus-visible, textarea:focus-visible, [tabindex]:focus-visible{
+    outline:3px solid var(--focus); outline-offset:2px;
+  }
+
+  label{
+    display:block; font-family:'IBM Plex Mono', monospace; font-size:10.5px;
+    letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px;
+  }
+  textarea{
+    width:100%; min-height:140px; resize:vertical;
+    background:var(--ink-2); border:1.5px solid var(--brass); border-radius:6px;
+    color:var(--text-light); padding:12px; font-family:'Inter', sans-serif; font-size:14px; line-height:1.6;
+  }
+  .count{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--text-muted); text-align:right; margin-top:4px; }
+
+  .mode-toggle{ display:flex; gap:8px; margin:18px 0 6px; }
+  .mode-btn{
+    flex:1; padding:10px; border-radius:5px; border:1.5px solid var(--brass);
+    background:transparent; color:var(--text-light); font-family:'Inter', sans-serif; font-weight:600; font-size:13.5px; cursor:pointer;
+  }
+  .mode-btn.active{ background:var(--brass); color:#1c150c; }
+
+  .draw-btn{
+    display:block; width:100%; margin-top:14px; padding:16px;
+    background:linear-gradient(135deg, var(--brass-bright), var(--brass));
+    color:#1c150c; font-family:'Cinzel', serif; font-weight:700; font-size:15px;
+    letter-spacing:0.04em; text-transform:uppercase; border:none; border-radius:5px; cursor:pointer;
+  }
+  .draw-btn:hover{ filter:brightness(1.1); }
+  .draw-btn:disabled{ opacity:0.5; cursor:not-allowed; }
+
+  .stage{
+    margin-top:26px; min-height:220px;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  /* Card mode */
+  .card-scene{ perspective:1000px; }
+  .card{
+    width:220px; height:150px; position:relative;
+    transform-style:preserve-3d; transition:transform 0.9s cubic-bezier(.2,.8,.2,1);
+  }
+  .card.flipped{ transform:rotateY(180deg); }
+  .card-face{
+    position:absolute; inset:0; backface-visibility:hidden;
+    border-radius:10px; display:flex; align-items:center; justify-content:center;
+    padding:18px; text-align:center; font-size:15px; line-height:1.4;
+  }
+  .card-front{
+    background:
+      repeating-linear-gradient(45deg, rgba(243,236,217,0.05) 0 10px, transparent 10px 20px),
+      linear-gradient(135deg, var(--ink-2), #2a231b);
+    border:2px solid var(--brass);
+    font-family:'Cinzel', serif; font-size:34px; color:var(--brass-bright);
+  }
+  .card-back{
+    background:var(--sand); color:var(--text-dark); border:2px solid var(--brass);
+    transform:rotateY(180deg); font-family:'Cinzel', serif; font-weight:600;
+  }
+
+  /* Slot mode */
+  .slot-window{
+    width:280px; height:180px; overflow:hidden; position:relative;
+    border:2px solid var(--brass); border-radius:8px; background:var(--sand);
+  }
+  .slot-window::before, .slot-window::after{
+    content:""; position:absolute; left:0; right:0; height:60px; z-index:2; pointer-events:none;
+  }
+  .slot-window::before{ top:0; background:linear-gradient(var(--sand), rgba(233,223,196,0)); }
+  .slot-window::after{ bottom:0; background:linear-gradient(rgba(233,223,196,0), var(--sand)); }
+  .slot-highlight{
+    position:absolute; top:60px; left:0; right:0; height:60px;
+    border-top:1.5px dashed var(--brass); border-bottom:1.5px dashed var(--brass);
+    z-index:1; pointer-events:none;
+  }
+  .slot-reel{ position:relative; z-index:0; }
+  .slot-row{
+    height:60px; display:flex; align-items:center; justify-content:center;
+    padding:0 14px; text-align:center; color:var(--text-dark); font-size:14.5px; font-weight:500;
+  }
+
+  .result-label{
+    margin-top:18px; text-align:center; font-family:'Cinzel', serif; font-size:16px;
+    color:var(--text-light); min-height:24px;
+  }
+
+  footer{ text-align:center; margin-top:26px; font-size:11.5px; color:var(--text-muted); line-height:1.6; }
+
+  @media (prefers-reduced-motion: reduce){
+    .card{ transition:none; }
+    .slot-reel{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🎲 Random Draw</h1>
+    <p class="sub">Paste your list (one item per line), pick a style, and draw. Works for names, tables, loot, whatever you need.</p>
+  </header>
+
+  <label for="listInput">Your list</label>
+  <textarea id="listInput" placeholder="One item per line&#10;e.g.&#10;Aldric&#10;Bren&#10;Corin"></textarea>
+  <div class="count" id="itemCount">0 items</div>
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" data-mode="cards" id="btnCards">🂠 Cards</button>
+    <button class="mode-btn" data-mode="slot" id="btnSlot">🎰 Slot Reel</button>
+  </div>
+
+  <button class="draw-btn" id="drawBtn">Draw</button>
+
+  <div class="stage">
+    <div class="card-scene" id="cardStage">
+      <div class="card" id="cardEl">
+        <div class="card-face card-front">?</div>
+        <div class="card-face card-back" id="cardResultText"></div>
+      </div>
+    </div>
+    <div class="slot-window" id="slotStage" style="display:none;">
+      <div class="slot-highlight"></div>
+      <div class="slot-reel" id="slotReel"></div>
+    </div>
+  </div>
+
+  <div class="result-label" id="resultLabel" role="status" aria-live="polite"></div>
+
+  <footer>Add or edit items any time — the draw always pulls from whatever's currently in the box.</footer>
+</div>
+
+<script>
+const listInput = document.getElementById('listInput');
+const itemCount = document.getElementById('itemCount');
+const drawBtn = document.getElementById('drawBtn');
+const cardStage = document.getElementById('cardStage');
+const slotStage = document.getElementById('slotStage');
+const cardEl = document.getElementById('cardEl');
+const cardResultText = document.getElementById('cardResultText');
+const slotReel = document.getElementById('slotReel');
+const resultLabel = document.getElementById('resultLabel');
+const btnCards = document.getElementById('btnCards');
+const btnSlot = document.getElementById('btnSlot');
+
+let mode = 'cards';
+let drawing = false;
+const ROW_H = 60;
+
+function getList(){
+  return listInput.value.split('\n').map(s => s.trim()).filter(Boolean);
+}
+
+function refreshCount(){
+  const n = getList().length;
+  itemCount.textContent = `${n} item${n === 1 ? '' : 's'}`;
+  drawBtn.disabled = n === 0;
+}
+listInput.addEventListener('input', refreshCount);
+
+function setMode(m){
+  mode = m;
+  btnCards.classList.toggle('active', m === 'cards');
+  btnSlot.classList.toggle('active', m === 'slot');
+  cardStage.style.display = m === 'cards' ? '' : 'none';
+  slotStage.style.display = m === 'slot' ? '' : 'none';
+  resultLabel.textContent = '';
+}
+btnCards.addEventListener('click', () => setMode('cards'));
+btnSlot.addEventListener('click', () => setMode('slot'));
+
+function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+function drawCard(list){
+  const result = pick(list);
+  cardEl.classList.remove('flipped');
+  cardResultText.textContent = '';
+  // force reflow so the un-flip actually resets before re-flipping
+  void cardEl.offsetWidth;
+  setTimeout(() => {
+    cardResultText.textContent = result;
+    cardEl.classList.add('flipped');
+  }, 250);
+  setTimeout(() => {
+    resultLabel.textContent = `Result: ${result}`;
+    drawing = false;
+    drawBtn.disabled = false;
+  }, 1300);
+}
+
+function drawSlot(list){
+  const target = pick(list);
+  const filler = [];
+  const FILLER_COUNT = 24;
+  for(let i = 0; i < FILLER_COUNT; i++){ filler.push(pick(list)); }
+  filler.push(target);
+
+  slotReel.style.transition = 'none';
+  slotReel.style.transform = 'translateY(0)';
+  slotReel.innerHTML = filler.map(item => `<div class="slot-row">${item}</div>`).join('');
+
+  // force reflow before animating
+  void slotReel.offsetHeight;
+
+  const targetIndex = filler.length - 1;
+  const offset = (targetIndex - 1) * ROW_H; // center target in the 3-row window
+  requestAnimationFrame(() => {
+    slotReel.style.transition = 'transform 2.6s cubic-bezier(0.12,0.68,0.22,1)';
+    slotReel.style.transform = `translateY(-${offset}px)`;
+  });
+
+  setTimeout(() => {
+    resultLabel.textContent = `Result: ${target}`;
+    drawing = false;
+    drawBtn.disabled = false;
+  }, 2700);
+}
+
+drawBtn.addEventListener('click', () => {
+  const list = getList();
+  if(list.length === 0 || drawing) return;
+  drawing = true;
+  drawBtn.disabled = true;
+  resultLabel.textContent = '';
+  if(mode === 'cards') drawCard(list);
+  else drawSlot(list);
+});
+
+refreshCount();
+</script>
+</body>
+</html>
