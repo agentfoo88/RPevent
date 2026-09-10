@@ -11,20 +11,20 @@
     --ink:#141110; --ink-2:#1c1815;
     --sand:#e9dfc4; --text-dark:#241d13; --text-light:#f3ecd9;
     --text-muted:#c3b797; --brass:#b3823f; --brass-bright:#e0ab63;
-    --focus:#ffd77a; --line:rgba(243,236,217,0.14);
+    --focus:#ffd77a; --line:rgba(243,236,217,0.14); --removed:#8a7a58;
   }
   *{box-sizing:border-box;}
   body{
     margin:0; background:radial-gradient(ellipse at top, var(--ink-2), var(--ink) 70%);
     color:var(--text-light); font-family:'Inter', sans-serif; min-height:100vh; padding:28px 16px 60px;
   }
-  .wrap{max-width:600px; margin:0 auto;}
+  .wrap{max-width:620px; margin:0 auto;}
   header{text-align:center; margin-bottom:20px;}
   h1{ font-family:'Cinzel', serif; font-weight:700; font-size:27px; margin:0 0 8px; }
   .sub{ font-size:13.5px; color:var(--text-muted); line-height:1.6; }
 
   a{color:var(--brass-bright);}
-  button:focus-visible, textarea:focus-visible, [tabindex]:focus-visible{
+  button:focus-visible, textarea:focus-visible, input:focus-visible, [tabindex]:focus-visible{
     outline:3px solid var(--focus); outline-offset:2px;
   }
 
@@ -37,14 +37,33 @@
     background:var(--ink-2); border:1.5px solid var(--brass); border-radius:6px;
     color:var(--text-light); padding:12px; font-family:'Inter', sans-serif; font-size:14px; line-height:1.6;
   }
-  .count{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--text-muted); text-align:right; margin-top:4px; }
+  .count-row{ display:flex; justify-content:space-between; align-items:center; margin-top:4px; }
+  .count{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--text-muted); }
+  .stale-note{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--brass-bright); }
 
-  .mode-toggle{ display:flex; gap:8px; margin:18px 0 6px; }
+  .btn-row{ display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; }
+  .btn{
+    padding:10px 16px; border-radius:5px; border:1.5px solid var(--brass);
+    background:transparent; color:var(--text-light); font-family:'Inter', sans-serif; font-weight:600; font-size:13.5px; cursor:pointer;
+  }
+  .btn:hover{ background:rgba(179,130,63,0.18); }
+  .btn.solid{ background:var(--brass); color:#1c150c; }
+  .btn.solid:hover{ filter:brightness(1.1); background:var(--brass); }
+  .btn:disabled{ opacity:0.4; cursor:not-allowed; }
+
+  .mode-toggle{ display:flex; gap:8px; margin:20px 0 10px; }
   .mode-btn{
     flex:1; padding:10px; border-radius:5px; border:1.5px solid var(--brass);
     background:transparent; color:var(--text-light); font-family:'Inter', sans-serif; font-weight:600; font-size:13.5px; cursor:pointer;
   }
   .mode-btn.active{ background:var(--brass); color:#1c150c; }
+
+  .toggle-row{
+    display:flex; align-items:center; gap:10px; margin:10px 0 4px;
+    padding:10px 14px; background:rgba(255,255,255,0.04); border:1px solid var(--line); border-radius:6px;
+  }
+  .toggle-row input[type="checkbox"]{ width:17px; height:17px; accent-color:var(--brass); flex:none; }
+  .toggle-row label{ margin:0; font-family:'Inter', sans-serif; font-size:13.5px; text-transform:none; letter-spacing:0; color:var(--text-light); }
 
   .draw-btn{
     display:block; width:100%; margin-top:14px; padding:16px;
@@ -55,12 +74,10 @@
   .draw-btn:hover{ filter:brightness(1.1); }
   .draw-btn:disabled{ opacity:0.5; cursor:not-allowed; }
 
-  .stage{
-    margin-top:26px; min-height:220px;
-    display:flex; align-items:center; justify-content:center;
-  }
+  .exhausted-note{ text-align:center; font-size:12.5px; color:var(--brass-bright); margin-top:8px; min-height:16px; }
 
-  /* Card mode */
+  .stage{ margin-top:22px; min-height:220px; display:flex; align-items:center; justify-content:center; }
+
   .card-scene{ perspective:1000px; }
   .card{
     width:220px; height:150px; position:relative;
@@ -76,15 +93,13 @@
     background:
       repeating-linear-gradient(45deg, rgba(243,236,217,0.05) 0 10px, transparent 10px 20px),
       linear-gradient(135deg, var(--ink-2), #2a231b);
-    border:2px solid var(--brass);
-    font-family:'Cinzel', serif; font-size:34px; color:var(--brass-bright);
+    border:2px solid var(--brass); font-family:'Cinzel', serif; font-size:34px; color:var(--brass-bright);
   }
   .card-back{
     background:var(--sand); color:var(--text-dark); border:2px solid var(--brass);
     transform:rotateY(180deg); font-family:'Cinzel', serif; font-weight:600;
   }
 
-  /* Slot mode */
   .slot-window{
     width:280px; height:180px; overflow:hidden; position:relative;
     border:2px solid var(--brass); border-radius:8px; background:var(--sand);
@@ -110,6 +125,34 @@
     color:var(--text-light); min-height:24px;
   }
 
+  section.panel{
+    margin-top:26px; background:rgba(255,255,255,0.04); border:1px solid var(--line);
+    border-radius:6px; padding:16px;
+  }
+  .panel-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .panel-title{ font-family:'Cinzel', serif; font-size:15px; margin:0; }
+
+  .pool-grid{
+    display:flex; flex-wrap:wrap; gap:6px;
+  }
+  .pool-chip{
+    font-size:12.5px; padding:5px 10px; border-radius:20px;
+    background:rgba(224,171,99,0.14); border:1px solid var(--brass);
+    color:var(--text-light);
+  }
+  .pool-chip.drawn{
+    text-decoration:line-through; color:var(--removed); border-color:var(--removed);
+    background:rgba(138,122,88,0.08);
+  }
+  .empty-note{ font-size:13px; color:var(--text-muted); font-style:italic; }
+
+  .history-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto; }
+  .history-item{
+    display:flex; justify-content:space-between; gap:10px;
+    font-size:13.5px; padding:7px 10px; background:rgba(255,255,255,0.03); border-radius:4px;
+  }
+  .history-item .idx{ font-family:'IBM Plex Mono', monospace; color:var(--text-muted); font-size:11.5px; }
+
   footer{ text-align:center; margin-top:26px; font-size:11.5px; color:var(--text-muted); line-height:1.6; }
 
   @media (prefers-reduced-motion: reduce){
@@ -122,19 +165,31 @@
 <div class="wrap">
   <header>
     <h1>🎲 Random Draw</h1>
-    <p class="sub">Paste your list (one item per line), pick a style, and draw. Works for names, tables, loot, whatever you need.</p>
+    <p class="sub">Paste your list, confirm it, then draw. Works for names, tables, loot, whatever you need.</p>
   </header>
 
-  <label for="listInput">Your list</label>
+  <label for="listInput">Your list (one item per line)</label>
   <textarea id="listInput" placeholder="One item per line&#10;e.g.&#10;Aldric&#10;Bren&#10;Corin"></textarea>
-  <div class="count" id="itemCount">0 items</div>
+  <div class="count-row">
+    <span class="count" id="itemCount">0 items typed</span>
+    <span class="stale-note" id="staleNote" style="display:none;">List changed — click Confirm to update the pool</span>
+  </div>
+  <div class="btn-row">
+    <button class="btn solid" id="confirmBtn">Confirm List</button>
+  </div>
+
+  <div class="toggle-row">
+    <input type="checkbox" id="removeMode">
+    <label for="removeMode">Remove each result after it's drawn (no repeats until reset)</label>
+  </div>
 
   <div class="mode-toggle">
     <button class="mode-btn active" data-mode="cards" id="btnCards">🂠 Cards</button>
     <button class="mode-btn" data-mode="slot" id="btnSlot">🎰 Slot Reel</button>
   </div>
 
-  <button class="draw-btn" id="drawBtn">Draw</button>
+  <button class="draw-btn" id="drawBtn" disabled>Draw</button>
+  <div class="exhausted-note" id="exhaustedNote"></div>
 
   <div class="stage">
     <div class="card-scene" id="cardStage">
@@ -151,13 +206,36 @@
 
   <div class="result-label" id="resultLabel" role="status" aria-live="polite"></div>
 
-  <footer>Add or edit items any time — the draw always pulls from whatever's currently in the box.</footer>
+  <section class="panel">
+    <div class="panel-head">
+      <h2 class="panel-title">Full List</h2>
+    </div>
+    <div class="pool-grid" id="poolGrid">
+      <span class="empty-note">No list confirmed yet.</span>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2 class="panel-title">Previous Results</h2>
+      <button class="btn" id="clearResultsBtn">Clear Results</button>
+    </div>
+    <ul class="history-list" id="historyList">
+      <li class="empty-note" id="historyEmptyNote">No draws yet.</li>
+    </ul>
+  </section>
+
+  <footer>Confirm re-loads the pool from the text box above (drawn/removed status resets) but keeps your results history intact.</footer>
 </div>
 
 <script>
 const listInput = document.getElementById('listInput');
 const itemCount = document.getElementById('itemCount');
+const staleNote = document.getElementById('staleNote');
+const confirmBtn = document.getElementById('confirmBtn');
+const removeModeCb = document.getElementById('removeMode');
 const drawBtn = document.getElementById('drawBtn');
+const exhaustedNote = document.getElementById('exhaustedNote');
 const cardStage = document.getElementById('cardStage');
 const slotStage = document.getElementById('slotStage');
 const cardEl = document.getElementById('cardEl');
@@ -166,21 +244,99 @@ const slotReel = document.getElementById('slotReel');
 const resultLabel = document.getElementById('resultLabel');
 const btnCards = document.getElementById('btnCards');
 const btnSlot = document.getElementById('btnSlot');
+const poolGrid = document.getElementById('poolGrid');
+const historyList = document.getElementById('historyList');
+const historyEmptyNote = document.getElementById('historyEmptyNote');
+const clearResultsBtn = document.getElementById('clearResultsBtn');
 
 let mode = 'cards';
 let drawing = false;
 const ROW_H = 60;
 
-function getList(){
+// pool = [{text, drawn:false}, ...] ; confirmed separately from raw textarea
+let pool = [];
+let lastConfirmedRaw = null;
+let history = []; // array of strings, most recent first
+
+function rawItems(){
   return listInput.value.split('\n').map(s => s.trim()).filter(Boolean);
 }
 
-function refreshCount(){
-  const n = getList().length;
-  itemCount.textContent = `${n} item${n === 1 ? '' : 's'}`;
-  drawBtn.disabled = n === 0;
+function refreshTypedCount(){
+  const n = rawItems().length;
+  itemCount.textContent = `${n} item${n === 1 ? '' : 's'} typed`;
+  const currentRaw = listInput.value;
+  staleNote.style.display = (lastConfirmedRaw !== null && currentRaw !== lastConfirmedRaw) ? '' : 'none';
 }
-listInput.addEventListener('input', refreshCount);
+listInput.addEventListener('input', refreshTypedCount);
+
+function confirmList(){
+  const items = rawItems();
+  pool = items.map(text => ({ text, drawn: false }));
+  lastConfirmedRaw = listInput.value;
+  staleNote.style.display = 'none';
+  renderPool();
+  updateDrawAvailability();
+}
+confirmBtn.addEventListener('click', confirmList);
+
+function availableItems(){
+  if(!removeModeCb.checked) return pool.map(p => p.text);
+  return pool.filter(p => !p.drawn).map(p => p.text);
+}
+
+function updateDrawAvailability(){
+  const avail = availableItems();
+  const hasPool = pool.length > 0;
+  if(!hasPool){
+    drawBtn.disabled = true;
+    exhaustedNote.textContent = '';
+  } else if(removeModeCb.checked && avail.length === 0){
+    drawBtn.disabled = true;
+    exhaustedNote.textContent = 'All items have been drawn — Clear Results to reset the pool, or re-confirm the list.';
+  } else {
+    drawBtn.disabled = false;
+    exhaustedNote.textContent = '';
+  }
+}
+removeModeCb.addEventListener('change', () => { renderPool(); updateDrawAvailability(); });
+
+function renderPool(){
+  if(pool.length === 0){
+    poolGrid.innerHTML = '<span class="empty-note">No list confirmed yet.</span>';
+    return;
+  }
+  poolGrid.innerHTML = pool.map(p => {
+    const showDrawn = removeModeCb.checked && p.drawn;
+    return `<span class="pool-chip${showDrawn ? ' drawn' : ''}">${p.text}</span>`;
+  }).join('');
+}
+
+function addHistory(text){
+  history.unshift(text);
+  renderHistory();
+}
+function renderHistory(){
+  if(history.length === 0){
+    historyList.innerHTML = '<li class="empty-note" id="historyEmptyNote">No draws yet.</li>';
+    return;
+  }
+  historyList.innerHTML = history.map((h, i) => {
+    const num = history.length - i;
+    return `<li class="history-item"><span>${h}</span><span class="idx">#${num}</span></li>`;
+  }).join('');
+}
+
+clearResultsBtn.addEventListener('click', () => {
+  history = [];
+  pool.forEach(p => p.drawn = false);
+  renderHistory();
+  renderPool();
+  updateDrawAvailability();
+  resultLabel.textContent = '';
+});
+
+function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
 
 function setMode(m){
   mode = m;
@@ -193,13 +349,18 @@ function setMode(m){
 btnCards.addEventListener('click', () => setMode('cards'));
 btnSlot.addEventListener('click', () => setMode('slot'));
 
-function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+function markDrawn(text){
+  if(!removeModeCb.checked) return;
+  const entry = pool.find(p => !p.drawn && p.text === text);
+  if(entry) entry.drawn = true;
+  renderPool();
+  updateDrawAvailability();
+}
 
 function drawCard(list){
   const result = pick(list);
   cardEl.classList.remove('flipped');
   cardResultText.textContent = '';
-  // force reflow so the un-flip actually resets before re-flipping
   void cardEl.offsetWidth;
   setTimeout(() => {
     cardResultText.textContent = result;
@@ -207,8 +368,10 @@ function drawCard(list){
   }, 250);
   setTimeout(() => {
     resultLabel.textContent = `Result: ${result}`;
+    addHistory(result);
+    markDrawn(result);
     drawing = false;
-    drawBtn.disabled = false;
+    updateDrawAvailability();
   }, 1300);
 }
 
@@ -222,12 +385,10 @@ function drawSlot(list){
   slotReel.style.transition = 'none';
   slotReel.style.transform = 'translateY(0)';
   slotReel.innerHTML = filler.map(item => `<div class="slot-row">${item}</div>`).join('');
-
-  // force reflow before animating
   void slotReel.offsetHeight;
 
   const targetIndex = filler.length - 1;
-  const offset = (targetIndex - 1) * ROW_H; // center target in the 3-row window
+  const offset = (targetIndex - 1) * ROW_H;
   requestAnimationFrame(() => {
     slotReel.style.transition = 'transform 2.6s cubic-bezier(0.12,0.68,0.22,1)';
     slotReel.style.transform = `translateY(-${offset}px)`;
@@ -235,13 +396,15 @@ function drawSlot(list){
 
   setTimeout(() => {
     resultLabel.textContent = `Result: ${target}`;
+    addHistory(target);
+    markDrawn(target);
     drawing = false;
-    drawBtn.disabled = false;
+    updateDrawAvailability();
   }, 2700);
 }
 
 drawBtn.addEventListener('click', () => {
-  const list = getList();
+  const list = availableItems();
   if(list.length === 0 || drawing) return;
   drawing = true;
   drawBtn.disabled = true;
@@ -250,7 +413,9 @@ drawBtn.addEventListener('click', () => {
   else drawSlot(list);
 });
 
-refreshCount();
+refreshTypedCount();
+renderPool();
+renderHistory();
 </script>
 </body>
 </html>
