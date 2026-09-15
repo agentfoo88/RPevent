@@ -41,6 +41,10 @@
   .count{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--text-muted); }
   .stale-note{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--brass-bright); }
 
+  .import-banner{
+    background:rgba(224,171,99,0.14); border:1.5px solid var(--brass); border-radius:6px;
+    padding:12px 14px; margin-bottom:14px; font-size:13.5px; line-height:1.5;
+  }
   .btn-row{ display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; }
   .btn{
     padding:10px 16px; border-radius:5px; border:1.5px solid var(--brass);
@@ -168,6 +172,14 @@
     <p class="sub">Paste your list, confirm it, then draw. Works for names, tables, loot, whatever you need.</p>
   </header>
 
+  <div class="import-banner" id="importBanner" style="display:none;">
+    <span id="importBannerText">A shared list was found in this link.</span>
+    <div class="btn-row" style="margin-top:8px;">
+      <button class="btn solid" id="importAcceptBtn">Import list</button>
+      <button class="btn" id="importDismissBtn">Dismiss</button>
+    </div>
+  </div>
+
   <label for="listInput">Your list (one item per line)</label>
   <textarea id="listInput" placeholder="One item per line&#10;e.g.&#10;Aldric&#10;Bren&#10;Corin"></textarea>
   <div class="count-row">
@@ -176,7 +188,9 @@
   </div>
   <div class="btn-row">
     <button class="btn solid" id="confirmBtn">Confirm List</button>
+    <button class="btn" id="shareBtn">🔗 Share List</button>
   </div>
+  <div class="stale-note" id="shareConfirm" style="display:block; margin-top:4px; min-height:14px;"></div>
 
   <div class="toggle-row">
     <input type="checkbox" id="removeMode">
@@ -313,7 +327,7 @@ function renderPool(){
 }
 
 function addHistory(text){
-  history.unshift(text);
+  history.push(text); // most recent goes at the end (bottom)
   renderHistory();
 }
 function renderHistory(){
@@ -322,9 +336,9 @@ function renderHistory(){
     return;
   }
   historyList.innerHTML = history.map((h, i) => {
-    const num = history.length - i;
-    return `<li class="history-item"><span>${h}</span><span class="idx">#${num}</span></li>`;
+    return `<li class="history-item"><span>${h}</span><span class="idx">#${i + 1}</span></li>`;
   }).join('');
+  historyList.scrollTop = historyList.scrollHeight;
 }
 
 clearResultsBtn.addEventListener('click', () => {
@@ -413,9 +427,92 @@ drawBtn.addEventListener('click', () => {
   else drawSlot(list);
 });
 
+// --- Share / Import ---
+const shareBtn = document.getElementById('shareBtn');
+const shareConfirm = document.getElementById('shareConfirm');
+const importBanner = document.getElementById('importBanner');
+const importAcceptBtn = document.getElementById('importAcceptBtn');
+const importDismissBtn = document.getElementById('importDismissBtn');
+
+function encodeList(str){
+  return btoa(unescape(encodeURIComponent(str)));
+}
+function decodeList(str){
+  try{
+    return decodeURIComponent(escape(atob(str)));
+  } catch(e){
+    return null;
+  }
+}
+
+function flashShareNote(msg){
+  shareConfirm.textContent = msg;
+  setTimeout(() => { shareConfirm.textContent = ''; }, 2200);
+}
+
+shareBtn.addEventListener('click', async () => {
+  const text = listInput.value;
+  if(!text.trim()){
+    flashShareNote('Nothing to share yet — add some items first.');
+    return;
+  }
+  const url = new URL(window.location.href);
+  url.search = '';
+  url.searchParams.set('list', encodeList(text));
+  const shareUrl = url.toString();
+
+  if(navigator.share){
+    try{
+      await navigator.share({ title: 'Random Draw list', text: 'Here\'s a list for Random Draw:', url: shareUrl });
+      return;
+    } catch(e){
+      // user cancelled or share failed — fall through to clipboard
+    }
+  }
+  try{
+    await navigator.clipboard.writeText(shareUrl);
+    flashShareNote('Link copied to clipboard ✓');
+  } catch(e){
+    flashShareNote('Could not copy automatically — copy the URL bar manually after sharing.');
+  }
+});
+
+let pendingImportText = null;
+function checkForSharedList(){
+  const params = new URLSearchParams(window.location.search);
+  const encoded = params.get('list');
+  if(!encoded) return;
+  const decoded = decodeList(encoded);
+  if(!decoded) return;
+  pendingImportText = decoded;
+  const n = decoded.split('\n').map(s => s.trim()).filter(Boolean).length;
+  document.getElementById('importBannerText').textContent =
+    `A shared list was found in this link (${n} item${n === 1 ? '' : 's'}). Import it?`;
+  importBanner.style.display = '';
+}
+
+importAcceptBtn.addEventListener('click', () => {
+  if(pendingImportText === null) return;
+  listInput.value = pendingImportText;
+  refreshTypedCount();
+  confirmList();
+  importBanner.style.display = 'none';
+  clearSharedUrlParam();
+});
+importDismissBtn.addEventListener('click', () => {
+  importBanner.style.display = 'none';
+  clearSharedUrlParam();
+});
+function clearSharedUrlParam(){
+  const url = new URL(window.location.href);
+  url.searchParams.delete('list');
+  window.history.replaceState({}, '', url.toString());
+}
+
 refreshTypedCount();
 renderPool();
 renderHistory();
+checkForSharedList();
 </script>
 </body>
 </html>
