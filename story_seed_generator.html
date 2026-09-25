@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Story Seed Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#15161b;
+    --ink-2:#1d1f26;
+    --parchment:#ece4d3;
+    --text-dark:#2b241d;
+    --text-light:#e9e3d4;
+    --text-muted:#9a9686;
+    --brass:#b8874f;
+    --brass-bright:#d1a262;
+    --plum:#6d4e5f;
+    --plum-bright:#93697f;
+    --plum-light:#b08aa0;
+    --on-brass:#0d0906;
+    --border-strong:#6e6e75;
+  }
+  *{box-sizing:border-box;}
+  html{ color-scheme: dark; }
+  body{
+    margin:0;
+    background:radial-gradient(ellipse at top, var(--ink-2), var(--ink) 65%);
+    color:var(--text-light);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+    padding:32px 16px 60px;
+  }
+  .wrap{max-width:640px; margin:0 auto;}
+  header{text-align:center; margin-bottom:24px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--brass-bright);
+    margin-bottom:6px;
+  }
+  h1{
+    font-family:'Cormorant Garamond', serif;
+    font-weight:600;
+    font-size:34px;
+    margin:0 0 6px;
+    color:var(--text-light);
+  }
+  .sub{
+    font-size:13px;
+    color:var(--text-muted);
+    max-width:420px;
+    margin:0 auto;
+    line-height:1.5;
+  }
+
+  .protagonist-row{
+    display:flex;
+    gap:10px;
+    margin:22px 0 6px;
+  }
+  .pf{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .pf label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:9.5px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--text-muted);
+  }
+  .pf input, .pf select{
+    background:rgba(255,255,255,0.04);
+    border:1px solid var(--border-strong);
+    border-radius:4px;
+    color:var(--text-light);
+    padding:9px 10px;
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+  }
+  .pf input:focus, .pf select:focus-visible{
+    outline:2px solid var(--brass-bright);
+    outline-offset:1px;
+  }
+
+  /* Explicit option/optgroup styling: without this, many browsers render the
+     native dropdown popup with a light default background while inheriting
+     our light text colour, making options nearly unreadable. */
+  select option, select optgroup{
+    background-color:#14151a;
+    color:#f2ede0;
+  }
+  select optgroup{
+    font-style:normal;
+    font-weight:600;
+    color:#c9b98f;
+  }
+
+  .seed-card{
+    background:
+      linear-gradient(var(--parchment), var(--parchment)) padding-box,
+      linear-gradient(135deg, var(--brass), var(--plum)) border-box;
+    border:1px solid transparent;
+    border-radius:2px;
+    padding:28px 26px;
+    margin:20px 0 28px;
+    color:var(--text-dark);
+    box-shadow:0 18px 40px -18px rgba(0,0,0,0.6);
+    position:relative;
+    transition:opacity 0.25s ease;
+  }
+  .seed-card::before{
+    content:"";
+    position:absolute;
+    top:10px; left:10px; right:10px; bottom:10px;
+    border:1px solid rgba(43,36,29,0.15);
+    pointer-events:none;
+  }
+  .seed-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--plum);
+    margin-bottom:10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .copy-btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-transform:none;
+    background:transparent;
+    border:1px solid var(--plum);
+    color:var(--plum);
+    padding:4px 9px;
+    border-radius:3px;
+    cursor:pointer;
+    transition:background 0.2s ease, color 0.2s ease;
+  }
+  .copy-btn:hover{ background:var(--plum); color:var(--parchment); }
+  .copy-btn:focus-visible{ outline:2px solid var(--plum); outline-offset:2px; }
+  .copy-btn.copied{ background:var(--plum); color:var(--parchment); }
+  .seed-text{
+    font-family:'Cormorant Garamond', serif;
+    font-size:20px;
+    line-height:1.65;
+    font-style:italic;
+  }
+  .themes-line{
+    margin-top:14px;
+    padding-top:12px;
+    border-top:1px solid rgba(43,36,29,0.15);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.04em;
+    color:var(--plum);
+  }
+  .themes-line b{
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+    font-size:9.5px;
+    margin-right:6px;
+  }
+
+  .section-heading{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--text-muted);
+    margin:20px 0 8px;
+  }
+
+  .fields, .theme-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .field-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.07);
+    border-radius:4px;
+    padding:10px 12px;
+    transition:background 0.2s ease, border-color 0.2s ease;
+  }
+  .field-row.updated{ background:rgba(184,135,79,0.12); }
+  .field-row.locked{ border-color:var(--brass-bright); }
+  .theme-row.locked{ border-color:var(--plum-light); }
+  .field-info{ min-width:0; flex:1; }
+  .field-cat{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:9.5px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--text-muted);
+    margin-bottom:2px;
+  }
+  .field-val{
+    font-size:14px;
+    color:var(--text-light);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .field-controls{
+    flex:none;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .field-select{
+    background:rgba(255,255,255,0.05);
+    border:1px solid var(--border-strong);
+    color:var(--text-light);
+    font-family:'Inter', sans-serif;
+    font-size:12px;
+    padding:6px 6px;
+    border-radius:4px;
+    max-width:118px;
+  }
+  .field-select:focus-visible{ outline:2px solid var(--brass-bright); }
+  .icon-btn{
+    flex:none;
+    width:32px; height:32px;
+    border-radius:50%;
+    border:1px solid var(--brass);
+    background:transparent;
+    color:var(--brass-bright);
+    font-size:14px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:transform 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+  }
+  .icon-btn:hover{ background:rgba(184,135,79,0.15); }
+  .icon-btn:active{ transform:rotate(25deg) scale(0.95); }
+  .icon-btn:focus-visible{ outline:2px solid var(--brass-bright); outline-offset:2px; }
+  .icon-btn.die-btn:disabled{ opacity:0.3; cursor:not-allowed; transform:none; }
+  .icon-btn.lock-btn.active{ background:rgba(184,135,79,0.25); }
+  .theme-row .icon-btn{ border-color:var(--plum-light); color:var(--plum-light); }
+  .theme-row .icon-btn:hover{ background:rgba(109,78,95,0.18); }
+  .theme-row .icon-btn.lock-btn.active{ background:rgba(109,78,95,0.28); }
+  .theme-row .field-select:focus-visible{ outline-color:var(--plum-light); }
+
+  .theme-summary{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    background:rgba(109,78,95,0.08);
+    border:1px solid var(--plum-light);
+    border-radius:4px;
+    padding:11px 14px;
+    cursor:pointer;
+    text-align:left;
+    color:var(--text-light);
+    font-family:'Inter', sans-serif;
+    font-size:13px;
+    transition:background 0.2s ease;
+  }
+  .theme-summary:hover{ background:rgba(109,78,95,0.15); }
+  .theme-summary:focus-visible{ outline:2px solid var(--plum-light); outline-offset:2px; }
+  .theme-summary .ts-list{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    color:var(--text-muted);
+    font-size:12px;
+    margin-top:2px;
+  }
+  .theme-summary .ts-caret{
+    flex:none;
+    font-family:'IBM Plex Mono', monospace;
+    color:var(--plum-light);
+    transition:transform 0.2s ease;
+  }
+  .theme-summary.open .ts-caret{ transform:rotate(90deg); }
+
+  .theme-panel{
+    margin-top:8px;
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:4px;
+    padding:14px;
+    display:none;
+    flex-direction:column;
+    gap:14px;
+  }
+  .theme-panel.open{ display:flex; }
+  .theme-panel-actions{
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+  }
+  .reroll-themes-btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.06em;
+    background:transparent;
+    border:1px solid var(--plum-light);
+    color:var(--plum-light);
+    padding:6px 12px;
+    border-radius:4px;
+    cursor:pointer;
+    transition:background 0.2s ease;
+  }
+  .reroll-themes-btn:hover{ background:rgba(109,78,95,0.15); }
+  .theme-tier-group{ display:flex; flex-direction:column; gap:6px; }
+  .theme-tier-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:9.5px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--text-muted);
+  }
+  .theme-check-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:6px 8px;
+    border-radius:4px;
+    transition:background 0.2s ease;
+  }
+  .theme-check-row.locked{ background:rgba(109,78,95,0.12); }
+  .theme-check-row input[type="checkbox"]{
+    flex:none;
+    width:18px; height:18px;
+    accent-color:var(--plum-bright);
+    cursor:pointer;
+  }
+  .theme-check-row label{
+    flex:1;
+    font-size:13.5px;
+    color:var(--text-light);
+    cursor:pointer;
+  }
+  .theme-check-row .icon-btn{
+    width:28px; height:28px;
+    font-size:12px;
+    border-color:var(--plum-light);
+    color:var(--plum-light);
+  }
+  .theme-check-row .icon-btn.active{ background:rgba(109,78,95,0.28); }
+
+
+  .reroll-all{
+    display:block;
+    width:100%;
+    margin-top:24px;
+    padding:14px;
+    background:linear-gradient(135deg, var(--brass-bright), #a67f49);
+    color:var(--on-brass);
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:0.02em;
+    border:none;
+    border-radius:4px;
+    cursor:pointer;
+    transition:filter 0.2s ease;
+  }
+  .reroll-all:hover{ filter:brightness(1.08); }
+  .reroll-all:focus-visible{ outline:2px solid var(--text-light); outline-offset:2px; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Seed Generator</div>
+    <h1>Story Seeds</h1>
+    <p class="sub">Roll the whole case, pick a detail directly, or lock one in place before rerolling the rest.</p>
+  </header>
+
+  <div class="protagonist-row">
+    <div class="pf">
+      <label for="nameInput">Name</label>
+      <input type="text" id="nameInput" value="Ilma" maxlength="24">
+    </div>
+    <div class="pf">
+      <label for="pronounSelect">Pronouns</label>
+      <select id="pronounSelect">
+        <option value="she">She / her</option>
+        <option value="he">He / him</option>
+        <option value="they">They / them</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="seed-card" id="seedCard">
+    <div class="seed-label">
+      <span>Case File — Draw #<span id="drawNum">1</span></span>
+      <button class="copy-btn" id="copyBtn">Copy</button>
+    </div>
+    <div class="seed-text" id="seedText" aria-live="polite">—</div>
+    <div class="themes-line" id="themesLine" style="display:none;" aria-live="polite"><b>Themes in play</b><span id="themesLineText"></span></div>
+  </div>
+
+  <div class="section-heading">Story Elements</div>
+  <div class="fields" id="fields"></div>
+
+  <div class="section-heading">Themes</div>
+  <button class="theme-summary" id="themeSummary" aria-expanded="false">
+    <span>
+      <span id="themeSummaryCount">0 selected</span>
+      <div class="ts-list" id="themeSummaryList">No themes selected</div>
+    </span>
+    <span class="ts-caret">▸</span>
+  </button>
+  <div class="theme-panel" id="themePanel">
+    <div class="theme-panel-actions">
+      <button class="reroll-themes-btn" id="lockAllThemesBtn">🔓 Lock all themes</button>
+      <button class="reroll-themes-btn" id="rerollThemesBtn">🎲 Reroll themes</button>
+    </div>
+    <div id="themeGroups"></div>
+  </div>
+
+  <button class="reroll-all" id="rerollAll">Reroll everything</button>
+</div>
+
+<script>
+const PRONOUNS = {
+  she:  { subj:"she", Subj:"She", obj:"her", poss:"her", Poss:"Her", possInd:"hers", be:"is", beC:"'s", has:"has", hasC:"'s", was:"was", isnt:"isn't", refl:"herself" },
+  he:   { subj:"he",  Subj:"He",  obj:"him", poss:"his", Poss:"His", possInd:"his",  be:"is", beC:"'s", has:"has", hasC:"'s", was:"was", isnt:"isn't", refl:"himself" },
+  they: { subj:"they",Subj:"They",obj:"them",poss:"their",Poss:"Their",possInd:"theirs",be:"are",beC:"'re",has:"have",hasC:"'ve",was:"were",isnt:"aren't", refl:"themself" }
+};
+
+function applyPronouns(str, p){
+  return str
+    .replaceAll("{subj}", p.subj)
+    .replaceAll("{Subj}", p.Subj)
+    .replaceAll("{obj}", p.obj)
+    .replaceAll("{poss}", p.poss)
+    .replaceAll("{Poss}", p.Poss)
+    .replaceAll("{possInd}", p.possInd)
+    .replaceAll("{be}", p.be)
+    .replaceAll("{beC}", p.beC)
+    .replaceAll("{has}", p.has)
+    .replaceAll("{hasC}", p.hasC)
+    .replaceAll("{was}", p.was)
+    .replaceAll("{isnt}", p.isnt)
+    .replaceAll("{refl}", p.refl);
+}
+
+const GENRE_GROUPS = {
+  "Fantasy": ["High Fantasy","Sword & Sorcery","Fairy Tale / Folklore","Urban Fantasy","Mythological"],
+  "Sci-Fi": ["Sci-fi","Space Opera","Cyberpunk","Post-apocalyptic"],
+  "Historical & Period": ["Historical","Regency","Steampunk","Dieselpunk","Western","Nautical / Pirate","Gothic"],
+  "Modern & Genre": ["Contemporary","Noir","Espionage","Academy / Boarding School","Superhero"]
+};
+
+const DATA = {
+  genre: [], // populated below from GENRE_GROUPS
+  setting: [
+    "deep-space survey vessel","orbital station bar","corporate megastructure","mining colony outpost","diplomatic space station","derelict salvage ship","terraforming settlement","interstellar cruise liner",
+    "noble household","traveling caravan","temple of a religious order","mercenary company","wizard's tower","royal court","border garrison","traveling circus troupe",
+    "private members' club","family business","university department","high-end household staff","corporate office","hospitality group","fashion house","recording studio",
+    "Victorian townhouse","merchant trading post","traveling theater troupe","textile mill","naval vessel","grand hotel","country estate","apothecary shop",
+    "corporate tower penthouse","underground data haven","neon-lit nightclub","black-market clinic","augmentation shop","slum tenement block","rooftop garden estate","hacker collective safehouse",
+    "fortified settlement","traveling caravan of survivors","underground bunker community","trading outpost","walled city-state","scavenger crew","isolated farmstead","warlord's compound",
+    "merchant sailing ship","pirate crew vessel","naval academy","island trading port","smuggler's cove hideout","fishing fleet","privateer's flagship","coastal lighthouse station",
+    "crumbling manor house","isolated convent","ancestral crypt estate","foggy moor village","old-world sanatorium","cursed bloodline household","decaying opera house","secluded abbey",
+    "frontier ranch","dusty saloon","railroad outpost","traveling stagecoach line","mining boomtown","sheriff's office","cattle drive crew","bordertown hotel",
+    "private detective agency","smoky jazz club","corrupt city hall office","dockside warehouse","underground casino","newspaper office","nightclub with backroom dealings","boxing gym",
+    "temple of a minor god","underworld waystation","oracle's sanctuary","a titan's household","court of a fae monarch","sacred grove","labyrinth keeper's post","island of exiled deities",
+    "hidden magical guild office","supernatural nightclub","modern coven household","secret occult bookshop","werewolf pack territory","vampire-owned business","underground fae market","magical creature sanctuary"
+  ],
+  role: [
+    {label:"newly hired attendant", clause:"newly hired, still learning where things are kept"},
+    {label:"apprentice", clause:"apprenticed here, having sought the training out {refl}"},
+    {label:"indentured debtor", clause:"working off a debt {subj} didn't expect to take this long"},
+    {label:"performer", clause:"brought on as a performer, valued for what {subj} can do on a stage or a floor"},
+    {label:"houseguest", clause:"staying on as a guest whose welcome has quietly turned into something else"},
+    {label:"lowest-ranking junior staff", clause:"the lowest rank in the room, and everyone above {obj} knows it"},
+    {label:"hired hand", clause:"hired on as extra hands, no particular status attached"},
+    {label:"ward / dependent", clause:"a dependent here, owing {poss} place to someone else's decision"},
+    {label:"outside contractor", clause:"brought in for one specific task, and somehow never quite let go"},
+    {label:"understudy", clause:"understudying someone whose shoes {subj}{beC} slowly being asked to fill"},
+    {label:"companion-attendant", clause:"kept close as a companion-attendant, half staff and half something more personal"},
+    {label:"new recruit", clause:"freshly recruited, still being sized up"},
+    {label:"displaced authority", clause:"someone who once ran this place, or something close to it, watching that authority get quietly taken apart"}
+  ],
+  otherParty: [
+    {label:"reclusive owner-operator", clause:"The reclusive owner-operator, rarely seen on the floor, has started asking for {obj} by name."},
+    {label:"exacting mentor", clause:"{Poss} mentor is exacting, gives nothing away for free, and expects everything done exactly once shown."},
+    {label:"formal superior, cold to warming", clause:"{Poss} superior runs things by results and results only — until that starts to change, slowly, for {obj} specifically."},
+    {label:"aging matriarch/patriarch", clause:"The household is run by an aging figure who does not explain the rules, only expects them followed."},
+    {label:"practical overseer", clause:"The overseer in charge treats everything as business — practical, not cruel, but absolute."},
+    {label:"mysterious patron", clause:"A patron who reveals almost nothing about themselves has taken a specific interest in {obj}."},
+    {label:"a collective with no single face", clause:"There's no single person in charge — just a collective whose decisions arrive without a name attached."},
+    {label:"stranger turned regular", clause:"One stranger keeps coming back, and has slowly stopped being a stranger at all."},
+    {label:"rival turned authority", clause:"Someone who once competed with {obj} has ended up, awkwardly, with authority over {obj}."},
+    {label:"old-money benefactor", clause:"An old-money benefactor is covering more than they should for someone they've barely explained wanting."},
+    {label:"enigmatic recruiter", clause:"The person who recruited {obj} remains difficult to read, even now."},
+    {label:"formal guild leadership", clause:"The guild's leadership operates by old formalities that are slowly starting to include {obj} by name."},
+    {label:"competing masters, divided claim", clause:"More than one person claims authority over {obj}, and they don't agree with each other."},
+    {label:"an ensemble household, power unevenly shared", clause:"The household holds several people with real say, and their power over {obj} isn't evenly split."}
+  ],
+  hook: [
+    {label:"took it out of necessity", clause:"{subj} took the position out of plain necessity"},
+    {label:"sought it out deliberately", clause:"{subj} sought this out deliberately, wanting the access or the skill"},
+    {label:"owed a debt", clause:"{subj} owed a debt that this arrangement was meant to settle"},
+    {label:"was assigned, didn't choose", clause:"{subj} was assigned here and wasn't given much say in it"},
+    {label:"inherited an obligation", clause:"{subj} inherited an obligation that wasn't originally {possInd}"},
+    {label:"answered a vague posting", clause:"{subj} answered a posting that told {obj} almost nothing beforehand"},
+    {label:"was recommended by someone she trusted", clause:"someone {subj} trusted recommended {obj} for this"},
+    {label:"lost a bet or wager", clause:"a lost wager was how {subj} ended up here at all"},
+    {label:"needed shelter or protection", clause:"{subj} needed shelter, and this was the arrangement that offered it"},
+    {label:"followed a chance encounter", clause:"a chance encounter was the only reason {subj} ended up here"},
+    {label:"was recruited directly", clause:"{subj} was recruited directly, sought out rather than applying"},
+    {label:"fulfilling family expectation", clause:"this fulfilled an expectation {poss} family or community had placed on {obj}"},
+    {label:"inherited the place itself", clause:"{subj} inherited this place outright, not just a debt attached to it"},
+    {label:"was bound through marriage or alliance", clause:"{subj} was bound here through a marriage or alliance {subj} didn't fully choose"},
+    {label:"won a place others didn't", clause:"{subj} won this place in a contest that left others behind"},
+    {label:"was recovering from illness or injury", clause:"{subj} was still recovering from an illness or injury"},
+    {label:"returned to somewhere she used to belong", clause:"{subj} came back to a place {subj} used to belong, and not everything had stayed the same"},
+    {label:"began through correspondence, before meeting in person", clause:"{subj} and the other party knew each other only through letters, long before they ever met in person"}
+  ],
+  escalation: [
+    {label:"dress code quietly shifts", clause:"the dress code keeps shifting, a little more each week, always framed as simply how things are done"},
+    {label:"ritual naming becomes specific", clause:"the formal address used for {obj} has started becoming oddly specific, used only when it's just the two of them"},
+    {label:"tasks with increasing stakes", clause:"each task asks for a little more — more exposure, more trust, more precision than the last"},
+    {label:"protocol introduced as tradition", clause:"new rules keep arriving, always presented as tradition rather than anyone's personal preference"},
+    {label:"proximity framed as necessity", clause:"{subj}{beC} kept closer than seems strictly necessary, and no one quite explains why"},
+    {label:"private access earned in stages", clause:"access is being handed to {obj} in stages — first the ordinary rooms, then the ones that were locked"},
+    {label:"public visibility creeps into private arrangements", clause:"what used to be private is starting to happen where others can see"},
+    {label:"correction turns personal", clause:"the corrections {subj} receives have started to feel less professional and more personal"},
+    {label:"reward shifts from practical to intimate", clause:"the rewards for doing well have quietly moved from practical to something more intimate"},
+    {label:"one rule multiplies into many", clause:"one small rule at the start has multiplied into a dozen unspoken ones"},
+    {label:"ordinary tasks are secretly trust tests", clause:"tasks that look ordinary keep turning out to be tests of trust"},
+    {label:"a title redefines her position", clause:"a new title has started to redefine what {poss} position actually means here"},
+    {label:"authority once held is being stripped away", clause:"whatever authority {subj} used to have here is being taken apart, piece by piece"}
+  ],
+  tone: [
+    {label:"formal / ritualistic", clause:"formal and ritualistic"},
+    {label:"casual / workplace-mundane", clause:"casual, almost mundane on the surface"},
+    {label:"transactional, warming slowly", clause:"transactional at first, warming slowly"},
+    {label:"mysterious / withholding", clause:"mysterious, withholding more than it explains"},
+    {label:"wry / darkly playful", clause:"wry, with a darkly playful edge"},
+    {label:"tender beneath a stern surface", clause:"stern on the surface, tender underneath"},
+    {label:"clinical, softening over time", clause:"clinical at first, softening the longer it goes on"},
+    {label:"old-fashioned and courtly", clause:"old-fashioned and courtly"},
+    {label:"tense, quietly charged", clause:"tense, quietly charged under the ordinary surface"},
+    {label:"melancholic / atmospheric", clause:"melancholic, heavy with atmosphere"},
+    {label:"playful / teasing", clause:"playful, teasing more than serious"},
+    {label:"austere and exacting", clause:"austere, exacting, unforgiving of small mistakes"}
+  ],
+  wildcard: [
+    {label:"none — play it straight", clause:""},
+    {label:"masks or uniforms as a device", clause:"A mask or uniform is doing more work here than simple costume."},
+    {label:"a ritual marker arrives early", clause:"A naming or marking ritual arrives earlier than {subj} expected, and means more than {subj} {was} told."},
+    {label:"a rival or observer complicates things", clause:"Someone else is watching this arrangement closely, and not kindly."},
+    {label:"a rumor precedes her", clause:"Something about {poss} arrival was already known before {subj} got here — a rumor, a reputation, a name passed along ahead of {obj}."},
+    {label:"a second character shares her role", clause:"{Subj} isn't the only one in this position — someone else shares it, for better or worse."},
+    {label:"she isn't what she seems", clause:"{Subj} {isnt} quite the person {subj}{hasC} presented {refl} as here, either."},
+    {label:"the place isn't what it claims to be", clause:"This place isn't quite what it claims to be, and {subj}{beC} starting to notice."},
+    {label:"others are being eliminated one by one", clause:"Others in {poss} position keep disappearing from it, one at a time."},
+    {label:"a countdown or deadline looms", clause:"There's a deadline hanging over all of this, and it's getting closer."},
+    {label:"a secret double identity", clause:"Someone in this arrangement isn't quite who they've presented themselves as."},
+    {label:"an old promise or debt resurfaces", clause:"Something from before this arrangement began has just come due."},
+    {label:"the arrangement becomes semi-public knowledge", clause:"What was private is starting to become an open secret."}
+  ],
+  theme: [
+    {label:"exhibitionism / exposure as stakes", tier:"yes"},
+    {label:"objectification with dignity underneath", tier:"yes"},
+    {label:"service-submission", tier:"yes"},
+    {label:"reclaimed charged language", tier:"yes"},
+    {label:"praise and name-calling as reward", tier:"yes"},
+    {label:"transactional framing", tier:"yes"},
+    {label:"slow-reveal, earned trust", tier:"yes"},
+    {label:"audience / voyeur element", tier:"yes"},
+    {label:"unfixed gender for the other party", tier:"yes"},
+    {label:"anonymity-vs-known tension", tier:"yes"},
+    {label:"light humiliation", tier:"maybe"},
+    {label:"protocol and structure", tier:"maybe"},
+    {label:"exhaustion / composure loss", tier:"maybe"},
+    {label:"DDLG undertone", tier:"maybe"},
+    {label:"sensory withholding", tier:"maybe"},
+    {label:"dubcon undertone, strong frame needed", tier:"gated"},
+    {label:"bullying / pushiness, strong frame needed", tier:"gated"}
+  ]
+};
+
+// Alphabetize everything that shows up in a dropdown, for scannability.
+Object.values(GENRE_GROUPS).forEach(arr => arr.sort((a,b)=>a.localeCompare(b)));
+DATA.genre = Object.values(GENRE_GROUPS).flat();
+DATA.setting.sort((a,b)=>a.localeCompare(b));
+["role","otherParty","hook","escalation","tone","wildcard"].forEach(k=>{
+  DATA[k].sort((a,b)=>a.label.localeCompare(b.label));
+});
+DATA.theme.sort((a,b)=>a.label.localeCompare(b.label));
+
+// Structural fields: key -> { source array, isStringArray }
+const FIELD_DEFS = [
+  {key:"genre", label:"Genre", source:DATA.genre, isStr:true, groups:GENRE_GROUPS},
+  {key:"setting", label:"Setting", source:DATA.setting, isStr:true},
+  {key:"role", label:"Role", source:DATA.role, isStr:false},
+  {key:"other", label:"Other Party", source:DATA.otherParty, isStr:false},
+  {key:"hook", label:"Hook", source:DATA.hook, isStr:false},
+  {key:"esc", label:"Escalation", source:DATA.escalation, isStr:false},
+  {key:"tone", label:"Tone", source:DATA.tone, isStr:false},
+  {key:"wild", label:"Wildcard", source:DATA.wildcard, isStr:false}
+];
+
+let current = {};
+let locks = {};
+let themeState = {}; // { [label]: { checked: bool, locked: bool, tier: string } }
+let themesLocked = false; // master lock: freezes the whole theme selection, ignoring per-item locks
+let themePanelOpen = false;
+let drawCount = 0;
+let protagonistName = "Ilma";
+let pronounKey = "she";
+
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+const TIER_ODDS = { yes: 0.5, maybe: 0.25, gated: 0.10 };
+
+function initThemeState(){
+  DATA.theme.forEach(t => {
+    themeState[t.label] = { checked: Math.random() < TIER_ODDS[t.tier], locked:false, tier:t.tier };
+  });
+}
+
+function rerollThemes(){
+  if(themesLocked) return;
+  DATA.theme.forEach(t => {
+    const s = themeState[t.label];
+    if(!s.locked){
+      s.checked = Math.random() < TIER_ODDS[t.tier];
+    }
+  });
+  renderThemes();
+  updateThemeSummaryAndLine();
+}
+
+function toggleThemeChecked(label){
+  themeState[label].checked = !themeState[label].checked;
+  renderThemes();
+  updateThemeSummaryAndLine();
+}
+
+function toggleThemeLock(label){
+  themeState[label].locked = !themeState[label].locked;
+  renderThemes();
+}
+
+function selectedThemeLabels(){
+  return DATA.theme.filter(t => themeState[t.label].checked).map(t => t.label);
+}
+
+function fieldLabel(def, value){ return def.isStr ? value : value.label; }
+function pickForField(def){ return def.isStr ? pick(def.source) : pick(def.source); }
+function findByLabel(def, label){
+  return def.isStr ? label : def.source.find(o => o.label === label);
+}
+
+function rollAll(){
+  drawCount++;
+  FIELD_DEFS.forEach(def => {
+    if(!locks[def.key]){
+      current[def.key] = pickForField(def);
+    }
+  });
+  DATA.theme.forEach(t => {
+    const s = themeState[t.label];
+    if(!themesLocked && !s.locked) s.checked = Math.random() < TIER_ODDS[t.tier];
+  });
+  render(true);
+}
+
+function rerollField(key){
+  if(locks[key]) return;
+  const def = FIELD_DEFS.find(d => d.key === key);
+  current[key] = pickForField(def);
+  render(false, key);
+}
+
+function setField(key, label){
+  const def = FIELD_DEFS.find(d => d.key === key);
+  current[key] = findByLabel(def, label);
+  render(false, key);
+}
+
+function toggleLock(key){
+  locks[key] = !locks[key];
+  renderFields();
+}
+
+function buildSeedText(){
+  const c = current;
+  const p = PRONOUNS[pronounKey];
+  const name = protagonistName.trim() || "Ilma";
+
+  let text = `${name} is ${applyPronouns(c.role.clause, p)} at a ${c.setting} — a ${c.genre.toLowerCase()} world. `;
+  text += `${applyPronouns(c.other.clause, p)} `;
+  text += `The arrangement began when ${applyPronouns(c.hook.clause, p)}. `;
+  text += `Lately, things are shifting: ${applyPronouns(c.esc.clause, p)}. `;
+  text += `The tone throughout is ${c.tone.clause}.`;
+  if(c.wild.clause){
+    text += ` ${applyPronouns(c.wild.clause, p)}`;
+  }
+  return text;
+}
+
+function toggleThemesLocked(){
+  themesLocked = !themesLocked;
+  const btn = document.getElementById("lockAllThemesBtn");
+  btn.textContent = themesLocked ? "🔒 Themes locked" : "🔓 Lock all themes";
+  document.getElementById("rerollThemesBtn").disabled = themesLocked;
+  updateThemeSummaryAndLine();
+}
+
+function updateThemeSummaryAndLine(){
+  const labels = selectedThemeLabels();
+  const lockNote = themesLocked ? " 🔒" : "";
+  document.getElementById("themeSummaryCount").textContent = `${labels.length} selected${lockNote}`;
+  document.getElementById("themeSummaryList").textContent = labels.length ? labels.join(", ") : "No themes selected";
+
+  const themesLine = document.getElementById("themesLine");
+  const themesLineText = document.getElementById("themesLineText");
+  if(labels.length > 0){
+    themesLine.style.display = "";
+    themesLineText.textContent = " " + labels.join(", ");
+  } else {
+    themesLine.style.display = "none";
+  }
+}
+
+function render(fullFade, singleKey){
+  document.getElementById("drawNum").textContent = drawCount || 1;
+  const seedCard = document.getElementById("seedCard");
+  const seedText = document.getElementById("seedText");
+
+  const doText = () => {
+    seedText.textContent = buildSeedText();
+    updateThemeSummaryAndLine();
+  };
+
+  if(fullFade){
+    seedCard.style.opacity = 0;
+    setTimeout(()=>{ doText(); seedCard.style.opacity = 1; }, 150);
+  } else {
+    doText();
+  }
+
+  renderFields(singleKey);
+  renderThemes();
+}
+
+function renderFields(highlightKey){
+  const container = document.getElementById("fields");
+  container.innerHTML = "";
+  FIELD_DEFS.forEach(def => {
+    const value = current[def.key];
+    const label = fieldLabel(def, value);
+    const isLocked = !!locks[def.key];
+    const row = document.createElement("div");
+    row.className = "field-row" + (def.key === highlightKey ? " updated" : "") + (isLocked ? " locked" : "");
+
+    const options = def.groups
+      ? Object.entries(def.groups).map(([groupName, items]) => {
+          const opts = items.map(optLabel => {
+            const selected = optLabel === label ? "selected" : "";
+            return `<option value="${optLabel.replace(/"/g,'&quot;')}" ${selected}>${optLabel}</option>`;
+          }).join("");
+          return `<optgroup label="${groupName}">${opts}</optgroup>`;
+        }).join("")
+      : def.source.map(o => {
+          const optLabel = def.isStr ? o : o.label;
+          const selected = optLabel === label ? "selected" : "";
+          return `<option value="${optLabel.replace(/"/g,'&quot;')}" ${selected}>${optLabel}</option>`;
+        }).join("");
+
+    row.innerHTML = `
+      <div class="field-info">
+        <div class="field-cat">${def.label}</div>
+        <div class="field-val">${label}</div>
+      </div>
+      <div class="field-controls">
+        <select class="field-select" data-key="${def.key}" aria-label="Choose ${def.label}">${options}</select>
+        <button class="icon-btn die-btn" aria-label="Reroll ${def.label}" data-key="${def.key}" ${isLocked ? "disabled" : ""}>🎲</button>
+        <button class="icon-btn lock-btn${isLocked ? " active" : ""}" aria-label="Lock ${def.label}" data-key="${def.key}">${isLocked ? "🔒" : "🔓"}</button>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+
+  container.querySelectorAll(".die-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=> rerollField(btn.dataset.key));
+  });
+  container.querySelectorAll(".lock-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=> toggleLock(btn.dataset.key));
+  });
+  container.querySelectorAll(".field-select").forEach(sel=>{
+    sel.addEventListener("change", (e)=> setField(sel.dataset.key, e.target.value));
+  });
+
+  if(highlightKey){
+    setTimeout(()=>{
+      const r = container.querySelector(`[data-key="${highlightKey}"]`);
+      if(r) r.closest(".field-row").classList.remove("updated");
+    }, 900);
+  }
+}
+
+function renderThemes(){
+  const groupsEl = document.getElementById("themeGroups");
+  groupsEl.innerHTML = "";
+
+  const groups = {yes:[], maybe:[], gated:[]};
+  DATA.theme.forEach(t => groups[t.tier].push(t));
+  const tierLabels = { yes:"Yes", maybe:"Maybe", gated:"Story-gated" };
+
+  Object.entries(groups).forEach(([tier, items]) => {
+    if(items.length === 0) return;
+    const groupDiv = document.createElement("div");
+    groupDiv.className = "theme-tier-group";
+    const heading = document.createElement("div");
+    heading.className = "theme-tier-label";
+    heading.textContent = tierLabels[tier];
+    groupDiv.appendChild(heading);
+
+    items.forEach(t => {
+      const s = themeState[t.label];
+      const id = "theme-" + t.label.replace(/[^a-z0-9]+/gi, "-");
+      const row = document.createElement("div");
+      row.className = "theme-check-row" + (s.locked ? " locked" : "");
+      row.innerHTML = `
+        <input type="checkbox" id="${id}" data-label="${t.label.replace(/"/g,'&quot;')}" ${s.checked ? "checked" : ""}>
+        <label for="${id}">${t.label}</label>
+        <button class="icon-btn lock-btn${s.locked ? " active" : ""}" aria-label="Lock ${t.label}" data-label="${t.label.replace(/"/g,'&quot;')}">${s.locked ? "🔒" : "🔓"}</button>
+      `;
+      groupDiv.appendChild(row);
+    });
+    groupsEl.appendChild(groupDiv);
+  });
+
+  groupsEl.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
+    cb.addEventListener("change", ()=> toggleThemeChecked(cb.dataset.label));
+  });
+  groupsEl.querySelectorAll(".lock-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=> toggleThemeLock(btn.dataset.label));
+  });
+}
+
+function setThemePanelOpen(open){
+  themePanelOpen = open;
+  const panel = document.getElementById("themePanel");
+  const summary = document.getElementById("themeSummary");
+  panel.classList.toggle("open", open);
+  summary.classList.toggle("open", open);
+  summary.setAttribute("aria-expanded", open ? "true" : "false");
+}
+
+document.getElementById("rerollAll").addEventListener("click", rollAll);
+document.getElementById("rerollThemesBtn").addEventListener("click", rerollThemes);
+document.getElementById("lockAllThemesBtn").addEventListener("click", toggleThemesLocked);
+document.getElementById("themeSummary").addEventListener("click", ()=> setThemePanelOpen(!themePanelOpen));
+document.getElementById("copyBtn").addEventListener("click", ()=>{
+  const btn = document.getElementById("copyBtn");
+  let text = document.getElementById("seedText").textContent;
+  const labels = selectedThemeLabels();
+  if(labels.length > 0){
+    text += "\n\nThemes in play: " + labels.join(", ");
+  }
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent = "Copied";
+    btn.classList.add("copied");
+    setTimeout(()=>{ btn.textContent = "Copy"; btn.classList.remove("copied"); }, 1500);
+  });
+});
+document.getElementById("nameInput").addEventListener("input", (e)=>{
+  protagonistName = e.target.value;
+  document.getElementById("seedText").textContent = buildSeedText();
+});
+document.getElementById("pronounSelect").addEventListener("change", (e)=>{
+  pronounKey = e.target.value;
+  document.getElementById("seedText").textContent = buildSeedText();
+});
+
+// init
+FIELD_DEFS.forEach(def => locks[def.key] = false);
+initThemeState();
+rollAll();
+</script>
+</body>
+</html>
