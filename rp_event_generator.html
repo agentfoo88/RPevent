@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>The Restless Pale — Event Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme:dark;
+    --ink:#0b111c;
+    --ink-2:#111a2b;
+    --field:#0d1524;
+    --card:#131d30;
+    --text-light:#e6edf7;
+    --text-muted:#9fb0c8;
+    --label:#8fb4e0;
+    --accent:#7fb2e5;
+    --accent-bright:#a5cdf5;
+    --accent-deep:#5a8cc2;
+    --on-accent:#0a1220;
+    --order:#8fa3d1;
+    --knowledge:#b58bd0;
+    --freedom:#e0a070;
+    --combat:#e07a7a;
+    --action:#d4bd5e;
+    --social:#6fc4aa;
+    --ok:#7fd1b0;
+    --warn:#e0c76a;
+    --bad:#f09090;
+    --line:rgba(159,176,200,0.22);
+    --focus:#ffd77a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:radial-gradient(ellipse at top, #16233a, var(--ink) 70%);
+    color:var(--text-light);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+    padding:28px 16px 60px;
+  }
+  .wrap{max-width:700px; margin:0 auto;}
+  header{text-align:center; margin-bottom:22px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    color:var(--accent-bright);
+    margin-bottom:8px;
+  }
+  h1{
+    font-family:'Cinzel', serif;
+    font-weight:700;
+    font-size:29px;
+    margin:0 0 8px;
+    letter-spacing:0.02em;
+  }
+  .sub{
+    font-size:13.5px;
+    color:var(--text-muted);
+    max-width:460px;
+    margin:0 auto;
+    line-height:1.6;
+  }
+
+  a{ color:var(--accent-bright); }
+  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible, [tabindex]:focus-visible{
+    outline:3px solid var(--focus);
+    outline-offset:2px;
+  }
+
+  /* Controls */
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin:24px 0 10px;
+    padding:16px;
+    background:rgba(127,178,229,0.05);
+    border:1px solid var(--line);
+    border-radius:6px;
+  }
+  .ctrl{
+    flex:1;
+    min-width:150px;
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+  }
+  .ctrl label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--text-muted);
+  }
+  .ctrl select{
+    background:var(--field);
+    border:1.5px solid var(--accent-deep);
+    border-radius:4px;
+    color:var(--text-light);
+    padding:10px 10px;
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+  }
+  .ctrl select option{
+    background:var(--field);
+    color:var(--text-light);
+  }
+
+  .preset-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:0 0 16px;
+    padding:12px 16px;
+    background:rgba(224,122,122,0.1);
+    border:1px solid rgba(224,122,122,0.5);
+    border-radius:6px;
+  }
+  .preset-row input[type="checkbox"]{
+    width:18px; height:18px;
+    accent-color:var(--combat);
+    flex:none;
+  }
+  .preset-row label{
+    font-size:13.5px;
+    line-height:1.5;
+    color:var(--text-light);
+  }
+  .preset-row .preset-title{ font-weight:600; }
+  .preset-row .preset-desc{ display:block; font-size:12px; color:var(--text-muted); margin-top:2px; }
+  .preset-row.disabled{ opacity:0.6; }
+
+  .roll-btn{
+    display:block;
+    width:100%;
+    margin-top:4px;
+    padding:16px;
+    background:linear-gradient(135deg, var(--accent-bright), var(--accent));
+    color:var(--on-accent);
+    font-family:'Cinzel', serif;
+    font-weight:700;
+    font-size:15px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    transition:filter 0.2s ease, transform 0.1s ease;
+  }
+  .roll-btn:hover{ filter:brightness(1.1); }
+  .roll-btn:active{ transform:scale(0.99); }
+
+  /* Main card */
+  .card{
+    background:
+      linear-gradient(var(--card), var(--card)) padding-box,
+      linear-gradient(135deg, var(--accent-deep), var(--ink-2)) border-box;
+    border:1px solid transparent;
+    border-radius:6px;
+    padding:6px 22px 24px;
+    color:var(--text-light);
+    box-shadow:0 20px 44px -20px rgba(0,0,0,0.8);
+    margin-top:22px;
+  }
+
+  .phase{
+    padding:16px 0;
+    border-bottom:1px dashed var(--line);
+  }
+  .phase:last-of-type{ border-bottom:none; }
+  .phase-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:8px;
+  }
+  .phase-title{
+    font-family:'Cinzel', serif;
+    font-weight:600;
+    font-size:16px;
+    margin:0;
+  }
+  .phase-time{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.06em;
+    color:var(--accent-bright);
+    background:rgba(127,178,229,0.14);
+    padding:3px 9px;
+    border-radius:20px;
+  }
+
+  .field{ margin-bottom:12px; }
+  .field:last-child{ margin-bottom:0; }
+  .field-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:3px;
+  }
+  .field-cat{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--label);
+  }
+  .field-note{
+    font-size:11px;
+    color:var(--text-muted);
+    font-style:italic;
+  }
+  .field-val{ font-size:14.5px; line-height:1.55; }
+  .field-val ul{ margin:4px 0 0; padding-left:18px; }
+  .field-val li{ margin-bottom:3px; }
+  .field-val input[type="text"]{
+    width:100%;
+    border:1.5px solid var(--accent-deep);
+    border-radius:4px;
+    padding:8px 10px;
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    background:var(--field);
+    color:var(--text-light);
+  }
+  input::placeholder{ color:#8496b0; opacity:1; }
+
+  .die-btn{
+    flex:none;
+    width:30px; height:30px;
+    border-radius:50%;
+    border:1.5px solid var(--accent-deep);
+    background:rgba(127,178,229,0.08);
+    color:var(--accent-bright);
+    font-size:14px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:transform 0.2s ease, background 0.2s ease;
+  }
+  .die-btn:hover{ background:rgba(127,178,229,0.22); }
+  .die-btn:active{ transform:rotate(20deg) scale(0.95); }
+  .die-btn[hidden]{ display:none; }
+
+  .branch-row{ margin-bottom:5px; }
+  .branch-tag{ font-weight:700; text-transform:uppercase; font-size:11px; letter-spacing:0.06em; margin-right:6px; }
+
+  .setup-note{ font-size:14px; line-height:1.6; }
+  .setup-preview{
+    margin-top:8px;
+    padding:10px 12px;
+    background:rgba(127,178,229,0.08);
+    border:1px dashed var(--accent-deep);
+    border-radius:4px;
+    font-family:'Cinzel', serif;
+    font-size:14.5px;
+    line-height:1.5;
+  }
+
+  .announce{
+    background:rgba(127,178,229,0.08);
+    border:1.5px solid var(--accent-deep);
+    border-radius:6px;
+    padding:18px;
+    margin-top:6px;
+  }
+  .announce h2{ font-family:'Cinzel', serif; font-size:16px; margin:0 0 10px; }
+  .badge-row{ display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+  .badge{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:4px 10px;
+    border-radius:20px;
+    background:rgba(255,255,255,0.06);
+    border:1.5px solid;
+    color:var(--text-light);
+  }
+  .announce-text{ font-family:'Cinzel', serif; font-size:18.5px; line-height:1.6; margin-bottom:14px; }
+  .start-time-field{ display:flex; align-items:center; gap:8px; margin-top:10px; }
+  .start-time-field label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--label);
+  }
+  .start-time-field input{
+    flex:1;
+    border:1.5px solid var(--accent-deep);
+    border-radius:4px;
+    padding:9px 10px;
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    background:var(--field);
+    color:var(--text-light);
+  }
+  .meta-line{ font-family:'IBM Plex Mono', monospace; font-size:12.5px; color:var(--label); margin-top:10px; }
+
+  .copy-btn{
+    display:block;
+    width:100%;
+    margin-top:14px;
+    padding:12px;
+    background:transparent;
+    border:1.5px solid var(--accent);
+    color:var(--accent-bright);
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    border-radius:4px;
+    cursor:pointer;
+    transition:background 0.2s ease, color 0.2s ease;
+  }
+  .copy-btn:hover{ background:var(--accent); color:var(--on-accent); }
+  .copy-confirm{
+    text-align:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    color:var(--ok);
+    margin-top:6px;
+    min-height:16px;
+  }
+
+  footer{
+    text-align:center;
+    margin-top:26px;
+    font-size:11.5px;
+    color:var(--text-muted);
+    line-height:1.6;
+  }
+
+  @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">The Restless Pale — Staff Tool</div>
+    <h1>One-Shot Event Generator</h1>
+    <p class="sub">Roll a full mini-event outline, laid out in the order you'll actually run it. Reroll any single field if a combination doesn't land. The Announcement is at the bottom, ready to copy into Discord.</p>
+  </header>
+
+  <form class="controls" aria-label="Event generation settings">
+    <div class="ctrl">
+      <label for="faction">Faction</label>
+      <select id="faction">
+        <option value="random">🎲 Random each roll</option>
+        <option value="order">Order — Khas Khemi</option>
+        <option value="knowledge">Knowledge — Sepermeru</option>
+        <option value="freedom">Freedom — New Tantula</option>
+        <option value="generic">Generic — no faction tie</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label for="bucket">Event Type</label>
+      <select id="bucket">
+        <option value="random">🎲 Random each roll</option>
+        <option value="social">Social</option>
+        <option value="action">Action</option>
+        <option value="combat">Combat</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label for="duration">Duration</label>
+      <select id="duration">
+        <option value="random">🎲 Random each roll</option>
+        <option value="60">1 hour</option>
+        <option value="120" selected>2 hours</option>
+        <option value="180">3 hours</option>
+      </select>
+    </div>
+  </form>
+
+  <div class="preset-row" id="presetRow">
+    <input type="checkbox" id="demolition">
+    <label for="demolition">
+      <span class="preset-title">Build Demolition preset (Combat only)</span>
+      <span class="preset-desc">Location becomes manual entry, Reward locks to wreckage loot, Branches are flavor only — the build comes down regardless.</span>
+    </label>
+  </div>
+
+  <button class="roll-btn" id="rollAll" type="button">🎲 Roll New Event</button>
+
+  <div class="card">
+    <!-- SETUP -->
+    <section class="phase" aria-labelledby="ph-setup">
+      <div class="phase-head">
+        <h2 class="phase-title" id="ph-setup">1. Setup</h2>
+        <span class="phase-time" id="t-setup"></span>
+      </div>
+      <p class="setup-note">Post the announcement to call players in. <a href="#announcement">Jump to announcement ↓</a></p>
+      <div class="setup-preview" id="setupPreview"></div>
+    </section>
+
+    <!-- INTRO -->
+    <section class="phase" aria-labelledby="ph-intro">
+      <div class="phase-head">
+        <h2 class="phase-title" id="ph-intro">2. Intro</h2>
+        <span class="phase-time" id="t-intro"></span>
+      </div>
+      <div class="field">
+        <div class="field-head"><span class="field-cat">Premise (full)</span></div>
+        <div class="field-val" id="h_premise"></div>
+      </div>
+      <div class="field">
+        <div class="field-head"><span class="field-cat" id="locationLabel">Location</span><button class="die-btn" data-key="location" id="locationDie" aria-label="Reroll location">🎲</button></div>
+        <div class="field-val" id="h_location"></div>
+        <div class="field-val" id="h_locationManual" style="display:none;">
+          <input type="text" id="locationManualInput" placeholder="Type the build's actual location" aria-label="Build location">
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-head"><span class="field-cat">Personae Dramatis</span><button class="die-btn" data-key="cast" aria-label="Reroll cast">🎲</button></div>
+        <div class="field-val" id="h_cast"></div>
+      </div>
+      <div class="field">
+        <div class="field-head">
+          <span class="field-cat">Item <span class="field-note">(optional — use if the scene calls for one)</span></span>
+          <button class="die-btn" data-key="item" aria-label="Reroll item">🎲</button>
+        </div>
+        <div class="field-val" id="h_item"></div>
+      </div>
+    </section>
+
+    <!-- MAIN ACTION -->
+    <section class="phase" aria-labelledby="ph-main">
+      <div class="phase-head">
+        <h2 class="phase-title" id="ph-main">3. Main Action</h2>
+        <span class="phase-time" id="t-main"></span>
+      </div>
+      <div class="field">
+        <div class="field-head"><span class="field-cat">Key Figure</span><button class="die-btn" data-key="keyfigure" aria-label="Reroll key figure">🎲</button></div>
+        <div class="field-val" id="h_keyfigure"></div>
+      </div>
+    </section>
+
+    <!-- COMPLICATION -->
+    <section class="phase" aria-labelledby="ph-complication">
+      <div class="phase-head">
+        <h2 class="phase-title" id="ph-complication">4. Complication</h2>
+        <span class="phase-time" id="t-complication"></span>
+      </div>
+      <div class="field">
+        <div class="field-head"><span class="field-cat">Complication</span><button class="die-btn" data-key="complication" aria-label="Reroll complication">🎲</button></div>
+        <div class="field-val" id="h_complication"></div>
+      </div>
+    </section>
+
+    <!-- RESOLUTION -->
+    <section class="phase" aria-labelledby="ph-resolution">
+      <div class="phase-head">
+        <h2 class="phase-title" id="ph-resolution">5. Resolution</h2>
+        <span class="phase-time" id="t-resolution"></span>
+      </div>
+      <div class="field">
+        <div class="field-head">
+          <span class="field-cat">Branches <span class="field-note" id="branchNote" style="display:none;">(flavor only — the outcome is fixed)</span></span>
+          <button class="die-btn" data-key="branch" aria-label="Reroll branches">🎲</button>
+        </div>
+        <div class="field-val" id="h_branch"></div>
+      </div>
+    </section>
+
+    <!-- WRAP-UP -->
+    <section class="phase" aria-labelledby="ph-wrapup">
+      <div class="phase-head">
+        <h2 class="phase-title" id="ph-wrapup">6. Wrap-up</h2>
+        <span class="phase-time" id="t-wrapup"></span>
+      </div>
+      <div class="field">
+        <div class="field-head"><span class="field-cat">Reward (OOC)</span><button class="die-btn" data-key="reward" id="rewardDie" aria-label="Reroll reward">🎲</button></div>
+        <div class="field-val" id="h_reward"></div>
+      </div>
+    </section>
+
+    <button class="copy-btn" id="copyHelper" type="button">Copy full helper script</button>
+    <div class="copy-confirm" id="confirmHelper" role="status" aria-live="polite"></div>
+
+    <!-- ANNOUNCEMENT -->
+    <div class="announce" id="announcement">
+      <h2>📣 Announcement</h2>
+      <div class="badge-row" id="publicBadges"></div>
+      <div class="announce-text" id="publicText"></div>
+      <div class="start-time-field">
+        <label for="startTime">Starts in</label>
+        <input type="text" id="startTime" value="30 minutes" placeholder="e.g. 30 minutes">
+      </div>
+      <div class="meta-line" id="publicLocation"></div>
+      <button class="copy-btn" id="copyPublic" type="button">Copy announcement text</button>
+      <div class="copy-confirm" id="confirmPublic" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <footer>Content pools reflect the latest review pass — reroll freely and flag anything that still reads off-tone or off-lore.</footer>
+</div>
+
+<script>
+const FACTION_META = {
+  order:     { name:"Khas Khemi (Order)", color:"var(--order)" },
+  knowledge: { name:"Sepermeru (Knowledge)", color:"var(--knowledge)" },
+  freedom:   { name:"New Tantula (Freedom)", color:"var(--freedom)" },
+  generic:   { name:"Unaligned", color:"var(--accent)" }
+};
+const BUCKET_META = {
+  social:  { name:"Social", color:"var(--social)", tail:"Be prepared for intrigue and conversation.", castSize:3 },
+  action:  { name:"Action", color:"var(--action)", tail:"Be ready to move.", castSize:2 },
+  combat:  { name:"Combat", color:"var(--combat)", tail:"Prepare for battle.", castSize:1 }
+};
+const FACTION_KEYS = ["order","knowledge","freedom","generic"];
+const BUCKET_KEYS = ["social","action","combat"];
+const DURATION_VALUES = [60,120,180];
+
+const TRIGGER = {
+  order: [
+    "A soldier has broken oath and fled into the sands",
+    "Someone has vandalized the temple mid-ceremony",
+    "A shipment of tribute has gone missing before it reached the garrison",
+    "A merchant is refusing to pay a toll they say is unfair",
+    "A prisoner has escaped the holding cells",
+    "Two citizens have called a ritual duel, and someone is needed to keep it fair",
+    "The granary reports theft from within its own walls",
+    "A guard has gone missing on patrol",
+    "Someone has been collecting \"fines\" that don't officially exist",
+    "A caravan under Khas Khemi's protection is overdue and hasn't been heard from",
+    "A brawl broke out during a public ceremony",
+    "Someone is forging papers to slip past checkpoints unnoticed",
+    "A dispute between two households has turned to threats",
+    "A supply run to an outlying post has gone quiet",
+    "A captured raider is being questioned, and the questioning is turning ugly"
+  ],
+  knowledge: [
+    "A scholar has unearthed something better left buried",
+    "An expedition into the ruins has gone silent",
+    "A relic thought lost has surfaced in the wrong hands",
+    "Forbidden texts have gone missing from the archive",
+    "A cult ritual has been sighted near the walls",
+    "Two scholars accuse each other of stealing research",
+    "An old seal has cracked open, and something's stirring",
+    "A merchant is offering knowledge that shouldn't be for sale",
+    "A researcher has gone missing chasing a lead alone",
+    "A find is about to ship out under a false name",
+    "Two apprentices are feuding over credit for a discovery",
+    "A vault thought sealed for good has been opened from the inside",
+    "A traveling collector wants access to something not meant to leave",
+    "A find is drawing unfriendly attention",
+    "A message in a dead language has been intercepted"
+  ],
+  freedom: [
+    "Mama-san's tithe collectors have come up short",
+    "A rival crew has moved in on the docks",
+    "A shipment has vanished before the buyer arrived",
+    "A debt has come due, and the debtor has vanished",
+    "Pirates have been spotted near the harbor",
+    "A bar brawl has spilled into the street",
+    "A stranger has been asking too many questions about the wrong people",
+    "A gambling ring has been caught cheating a patron who won't let it go",
+    "Someone is selling fake goods under a trusted name",
+    "A smuggler needs a hand moving cargo before the tide turns",
+    "A crew member has gone missing after a job",
+    "Two crews are about to come to blows over territory",
+    "A newcomer has been robbed on their first night in town",
+    "A trusted face has been spotted somewhere they shouldn't be",
+    "A bounty has been posted for someone who hasn't actually done anything wrong"
+  ],
+  generic: [
+    "Something has gone wrong, and no one else is nearby to deal with it",
+    "A stranger has arrived with a problem and coin to spare",
+    "Trouble has found its way here, as it always does",
+    "A call for aid has gone out, with little explanation given",
+    "Something has been stolen, and someone wants it back",
+    "A dispute has escalated further than anyone intended",
+    "Someone has gone missing, and no one's looking for them but you",
+    "A stranger needs an escort somewhere they won't say why",
+    "A rumor is spreading fast, and no one can confirm where it started",
+    "Something valuable has been found, and more than one person wants it"
+  ]
+};
+
+const STAKES = [
+  "or the damage will only spread",
+  "before whoever's responsible slips away for good",
+  "or someone innocent will pay for it",
+  "before word gets out and makes things worse",
+  "or it will happen again, worse next time",
+  "before the wrong people find out first",
+  "or the cost will fall on people who had nothing to do with it",
+  "before the trail goes cold"
+];
+
+const ITEM_DESC = ["tarnished","black iron","obsidian","bone-white","gilded","rust-eaten","weather-worn","verdigris-streaked","blood-dark","sun-bleached"];
+const ITEM_OBJ = ["idol","dagger","mask","ring","tablet","urn","seal","amulet","scroll case","crown fragment"];
+const ITEM_PROP = [
+  "that hums faintly when touched",
+  "said to predate the Cataclysm",
+  "etched in a script no scholar can read",
+  "warm to the touch though it shouldn't be",
+  "that whispers if held too long",
+  "marked with a symbol no faction claims",
+  "that no flame will burn",
+  "rumored to be cursed, though nothing's proven",
+  "said to have belonged to a forgotten king",
+  "that draws insects no matter the season"
+];
+
+const LOCATION = [
+  "the docks of a busy port",
+  "a guarded warehouse",
+  "the undercroft of an old garrison",
+  "a market square at dusk",
+  "a smuggler's den",
+  "an archive's lower level",
+  "a desert ruin half-buried in sand",
+  "a tavern back room",
+  "a caravan camp outside the walls",
+  "a shrine no longer tended"
+];
+
+const KEYFIGURE = [
+  "A hardened mercenary, clearly used to rough work",
+  "A weathered traveler who's been on the road a long while",
+  "Someone in guard's colors, though something about them feels off",
+  "A well-dressed stranger who doesn't quite fit the surroundings",
+  "A hooded figure keeping to the edges of the scene",
+  "A local face everyone in town seems to recognize",
+  "Someone carrying more coin than they probably should",
+  "A person who flinches at any mention of the law",
+  "Someone with old scars and a name that doesn't quite match their story",
+  "A person who talks fast and won't quite meet your eyes",
+  "Someone who keeps checking over their shoulder",
+  "A stranger who clearly knows more than they're letting on",
+  "Someone dressed for a fight they didn't expect to have",
+  "A person the rest of town seems to quietly avoid"
+];
+
+const CAST_POOL = [
+  "a nervous dockhand who saw more than they should have",
+  "a guard captain following orders they don't fully agree with",
+  "a merchant trying to stay neutral",
+  "a scribe who knows more than they let on",
+  "a barkeep who hears everything",
+  "a wandering healer passing through",
+  "a young runner eager to prove themselves",
+  "an old veteran who's seen this before",
+  "a fortune teller with unsettling accuracy",
+  "a rival adventurer with their own agenda"
+];
+
+const COMPLICATION = [
+  "A storm rolls in, cutting visibility and forcing everyone to move faster",
+  "A second group shows up chasing the same goal, and they don't want to share",
+  "The person who asked for help turns out to have started the trouble themselves",
+  "Reinforcements — for the other side — arrive earlier than expected",
+  "One of the NPCs helping the players is quietly stalling, or pocketing something along the way",
+  "The location turns dangerous mid-scene — fire, collapse, or flood",
+  "A crowd gathers to watch, and now there are witnesses who won't leave",
+  "The deadline moves up without warning — less time than promised",
+  "The objective is better guarded or better hidden than expected",
+  "Someone spots the players doing something they shouldn't, and now they're being watched",
+  "The way back is blocked, and the only route out is longer and riskier",
+  "Something breaks or is damaged mid-task, with no easy fix on hand",
+  "A bystander gets caught in the middle and can't be ignored or left behind",
+  "The target isn't alone — someone unexpected is with them",
+  "A rival group is already on-site, working the same problem from a different angle"
+];
+
+const BRANCH_SETS = [
+  { success:"The task is completed cleanly; those involved take note.", partial:"The task is completed, but at a cost — something or someone is lost along the way.", failure:"The task fails; consequences ripple outward into the wider town." },
+  { success:"Trust is earned, opening doors for future dealings.", partial:"An uneasy truce is struck, satisfying no one fully.", failure:"Tensions worsen, and the conflict deepens." },
+  { success:"The threat is neutralized before it can spread further.", partial:"The immediate threat is handled, but its source escapes.", failure:"The threat escalates, and returns larger than before." },
+  { success:"A grateful ally remembers this favor.", partial:"The favor is repaid, but reluctantly and with strings attached.", failure:"A potential ally becomes a quiet enemy instead." },
+  { success:"The truth comes out clean, and the right party is held responsible.", partial:"Part of the truth comes out; the rest stays buried for now.", failure:"The truth is buried, and someone else takes the blame." }
+];
+
+const REWARD = [
+  "Standard job payout, plus a small bonus for difficulty",
+  "A modest sum of server coin",
+  "A rare collectible item tied to the event",
+  "A discount or favor redeemable at a relevant shop",
+  "A reputation increase with the relevant faction",
+  "A cosmetic item with no mechanical benefit",
+  "Bonus payout if resolved within the time-box",
+  "A relic or curio with no mechanical effect, just flavor"
+];
+
+const DEMOLITION_REWARD = "Loot from the wreckage — players may take what's left standing.";
+
+const PHASE_SPLIT = [
+  {key:"setup", label:"Setup", pct:0.08},
+  {key:"intro", label:"Intro", pct:0.12},
+  {key:"main", label:"Main Action", pct:0.35},
+  {key:"complication", label:"Complication", pct:0.15},
+  {key:"resolution", label:"Resolution", pct:0.20},
+  {key:"wrapup", label:"Wrap-up", pct:0.10}
+];
+
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function pickN(arr, n){
+  const copy = [...arr];
+  const out = [];
+  n = Math.min(n, copy.length);
+  for(let i=0;i<n;i++){
+    const idx = Math.floor(Math.random()*copy.length);
+    out.push(copy.splice(idx,1)[0]);
+  }
+  return out;
+}
+function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+let state = {};
+
+function resolveFaction(){
+  const v = document.getElementById('faction').value;
+  return v === 'random' ? pick(FACTION_KEYS) : v;
+}
+function resolveBucket(){
+  const v = document.getElementById('bucket').value;
+  return v === 'random' ? pick(BUCKET_KEYS) : v;
+}
+function resolveDuration(){
+  const v = document.getElementById('duration').value;
+  return v === 'random' ? pick(DURATION_VALUES) : parseInt(v, 10);
+}
+function isDemolition(){
+  return document.getElementById('demolition').checked && state.bucket === 'combat';
+}
+
+function rollItem(){
+  return { desc: pick(ITEM_DESC), obj: pick(ITEM_OBJ), prop: pick(ITEM_PROP) };
+}
+
+function rollAll(){
+  state.faction = resolveFaction();
+  state.bucket = resolveBucket();
+  state.duration = resolveDuration();
+  state.trigger = pick(TRIGGER[state.faction]);
+  state.stakes = pick(STAKES);
+  state.location = pick(LOCATION);
+  state.locationManual = "";
+  state.keyfigure = pick(KEYFIGURE);
+  state.cast = pickN(CAST_POOL, BUCKET_META[state.bucket].castSize);
+  state.item = rollItem();
+  state.complication = pick(COMPLICATION);
+  state.branch = pick(BRANCH_SETS);
+  state.reward = pick(REWARD);
+  render();
+}
+
+function rerollField(key){
+  switch(key){
+    case "location": state.location = pick(LOCATION); break;
+    case "keyfigure": state.keyfigure = pick(KEYFIGURE); break;
+    case "cast": state.cast = pickN(CAST_POOL, BUCKET_META[state.bucket].castSize); break;
+    case "item": state.item = rollItem(); break;
+    case "complication": state.complication = pick(COMPLICATION); break;
+    case "branch": state.branch = pick(BRANCH_SETS); break;
+    case "reward": state.reward = pick(REWARD); break;
+  }
+  render();
+}
+
+function premiseSentence(){
+  return `${cap(state.trigger)}, ${state.stakes}.`;
+}
+function itemSentence(){
+  return `A ${state.item.desc} ${state.item.obj} ${state.item.prop}.`;
+}
+function locationText(){
+  const demo = isDemolition();
+  if(demo) return state.locationManual && state.locationManual.trim() ? state.locationManual.trim() : "(location not yet entered)";
+  return cap(state.location);
+}
+function rewardText(){
+  return isDemolition() ? DEMOLITION_REWARD : (cap(state.reward) + '.');
+}
+
+function timebox(mins){
+  const out = [];
+  let used = 0;
+  for(let i=0;i<PHASE_SPLIT.length;i++){
+    const p = PHASE_SPLIT[i];
+    if(i === PHASE_SPLIT.length - 1){
+      out.push({label:p.label, key:p.key, val: mins - used});
+    } else {
+      const v = Math.max(5, Math.round(mins*p.pct/5)*5);
+      used += v;
+      out.push({label:p.label, key:p.key, val:v});
+    }
+  }
+  return out;
+}
+
+function render(){
+  const fMeta = FACTION_META[state.faction];
+  const bMeta = BUCKET_META[state.bucket];
+  const demo = isDemolition();
+
+  // Preset row enable/disable
+  const presetRow = document.getElementById('presetRow');
+  presetRow.classList.toggle('disabled', state.bucket !== 'combat');
+  document.getElementById('demolition').disabled = state.bucket !== 'combat';
+
+  // Announcement
+  document.getElementById('publicBadges').innerHTML = `
+    <span class="badge" style="border-color:${fMeta.color}">${fMeta.name}</span>
+    <span class="badge" style="border-color:${bMeta.color}">${bMeta.name}</span>
+    ${demo ? '<span class="badge" style="border-color:var(--combat)">Build Demolition</span>' : ''}
+  `;
+  document.getElementById('publicText').textContent = `${premiseSentence()} ${bMeta.tail}`;
+  document.getElementById('publicLocation').textContent = `📍 ${locationText()}`;
+
+  document.getElementById('setupPreview').textContent = `"${premiseSentence()} ${bMeta.tail}" — ${locationText()}`;
+
+  // Intro
+  document.getElementById('h_premise').textContent = premiseSentence();
+
+  document.getElementById('locationLabel').textContent = demo ? "Location (manual)" : "Location";
+  document.getElementById('locationDie').hidden = demo;
+  document.getElementById('h_location').style.display = demo ? 'none' : '';
+  document.getElementById('h_locationManual').style.display = demo ? '' : 'none';
+  if(demo && document.getElementById('locationManualInput').value !== state.locationManual){
+    document.getElementById('locationManualInput').value = state.locationManual;
+  }
+  if(!demo){
+    document.getElementById('h_location').textContent = cap(state.location);
+  }
+
+  document.getElementById('h_cast').innerHTML = '<ul>' + state.cast.map(c=>`<li>${cap(c)}</li>`).join('') + '</ul>';
+  document.getElementById('h_item').textContent = itemSentence();
+
+  // Main action
+  document.getElementById('h_keyfigure').textContent = state.keyfigure + '.';
+
+  // Complication
+  document.getElementById('h_complication').textContent = state.complication + '.';
+
+  // Resolution
+  document.getElementById('branchNote').style.display = demo ? '' : 'none';
+  document.getElementById('h_branch').innerHTML = `
+    <div class="branch-row"><span class="branch-tag" style="color:var(--ok);">Success</span>${state.branch.success}</div>
+    <div class="branch-row"><span class="branch-tag" style="color:var(--warn);">Partial</span>${state.branch.partial}</div>
+    <div class="branch-row"><span class="branch-tag" style="color:var(--bad);">Failure</span>${state.branch.failure}</div>
+  `;
+
+  // Wrap-up
+  document.getElementById('rewardDie').hidden = demo;
+  document.getElementById('h_reward').textContent = rewardText();
+
+  // Time-box
+  const tb = timebox(state.duration);
+  tb.forEach(p=>{
+    const el = document.getElementById('t-'+p.key);
+    if(el) el.textContent = `${p.val} min`;
+  });
+}
+
+function buildPublicCopyText(){
+  const bMeta = BUCKET_META[state.bucket];
+  const startTime = document.getElementById('startTime').value.trim() || "soon";
+  return `Impromptu Event: ${premiseSentence()} ${bMeta.tail}\nStarting in ${startTime} — ${locationText()}.`;
+}
+
+function buildHelperCopyText(){
+  const tb = timebox(state.duration);
+  const timeFor = key => tb.find(p=>p.key===key).val;
+  const demo = isDemolition();
+  return [
+    `EVENT: ${FACTION_META[state.faction].name} / ${BUCKET_META[state.bucket].name}${demo ? ' / Build Demolition' : ''} / ${state.duration} min total`,
+    ``,
+    `1. SETUP (${timeFor('setup')}m) — Post the announcement.`,
+    `2. INTRO (${timeFor('intro')}m)`,
+    `   Premise: ${premiseSentence()}`,
+    `   Location: ${locationText()}`,
+    `   Personae Dramatis:`,
+    ...state.cast.map(c=>`     - ${cap(c)}`),
+    `   Item (optional): ${itemSentence()}`,
+    `3. MAIN ACTION (${timeFor('main')}m)`,
+    `   Key Figure: ${state.keyfigure}.`,
+    `4. COMPLICATION (${timeFor('complication')}m)`,
+    `   ${state.complication}.`,
+    `5. RESOLUTION (${timeFor('resolution')}m)${demo ? ' — flavor only, outcome fixed' : ''}`,
+    `   Success: ${state.branch.success}`,
+    `   Partial: ${state.branch.partial}`,
+    `   Failure: ${state.branch.failure}`,
+    `6. WRAP-UP (${timeFor('wrapup')}m)`,
+    `   Reward: ${rewardText()}`
+  ].join('\n');
+}
+
+function flashConfirm(el, msg){
+  el.textContent = msg || "Copied ✓";
+  setTimeout(()=>{ el.textContent = ""; }, 1600);
+}
+
+document.getElementById('rollAll').addEventListener('click', rollAll);
+document.getElementById('faction').addEventListener('change', ()=>{ if(document.getElementById('faction').value !== 'random') rollAll(); });
+document.getElementById('bucket').addEventListener('change', ()=>{
+  if(document.getElementById('bucket').value !== 'combat'){
+    document.getElementById('demolition').checked = false;
+  }
+  if(document.getElementById('bucket').value !== 'random') rollAll();
+});
+document.getElementById('duration').addEventListener('change', ()=>{
+  const v = document.getElementById('duration').value;
+  if(v !== 'random'){ state.duration = parseInt(v,10); render(); }
+});
+document.getElementById('demolition').addEventListener('change', ()=>{
+  if(document.getElementById('demolition').checked){
+    document.getElementById('bucket').value = 'combat';
+    state.bucket = 'combat';
+  }
+  render();
+});
+document.getElementById('locationManualInput').addEventListener('input', (e)=>{
+  state.locationManual = e.target.value;
+  render();
+});
+
+document.querySelectorAll('.die-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=> rerollField(btn.dataset.key));
+});
+
+document.getElementById('copyPublic').addEventListener('click', ()=>{
+  navigator.clipboard.writeText(buildPublicCopyText()).then(()=>flashConfirm(document.getElementById('confirmPublic')));
+});
+document.getElementById('copyHelper').addEventListener('click', ()=>{
+  navigator.clipboard.writeText(buildHelperCopyText()).then(()=>flashConfirm(document.getElementById('confirmHelper')));
+});
+
+rollAll();
+</script>
+</body>
+</html>
