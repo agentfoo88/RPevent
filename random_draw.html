@@ -3,19 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
 <title>Random Draw</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#141110; --ink-2:#1c1815;
-    --sand:#e9dfc4; --text-dark:#241d13; --text-light:#f3ecd9;
-    --text-muted:#c3b797; --brass:#b3823f; --brass-bright:#e0ab63;
-    --focus:#ffd77a; --line:rgba(243,236,217,0.14); --removed:#8a7a58;
+    color-scheme:dark;
+    --ink:#0b111c; --ink-2:#111a2b;
+    --sand:#131d30; --text-dark:#e6edf7; --text-light:#e6edf7;
+    --text-muted:#9fb0c8; --brass:#7fb2e5; --brass-bright:#a5cdf5;
+    --focus:#ffd77a; --line:rgba(159,176,200,0.22); --removed:#8496b0;
+    --on-accent:#0a1220;
   }
   *{box-sizing:border-box;}
   body{
-    margin:0; background:radial-gradient(ellipse at top, var(--ink-2), var(--ink) 70%);
+    margin:0; background:radial-gradient(ellipse at top, #16233a, var(--ink) 70%);
     color:var(--text-light); font-family:'Inter', sans-serif; min-height:100vh; padding:28px 16px 60px;
   }
   .wrap{max-width:620px; margin:0 auto;}
@@ -27,6 +30,8 @@
   button:focus-visible, textarea:focus-visible, input:focus-visible, [tabindex]:focus-visible{
     outline:3px solid var(--focus); outline-offset:2px;
   }
+
+  textarea::placeholder{ color:#8496b0; opacity:1; }
 
   label{
     display:block; font-family:'IBM Plex Mono', monospace; font-size:10.5px;
@@ -42,7 +47,7 @@
   .stale-note{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--brass-bright); }
 
   .import-banner{
-    background:rgba(224,171,99,0.14); border:1.5px solid var(--brass); border-radius:6px;
+    background:rgba(127,178,229,0.14); border:1.5px solid var(--brass); border-radius:6px;
     padding:12px 14px; margin-bottom:14px; font-size:13.5px; line-height:1.5;
   }
   .btn-row{ display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; }
@@ -50,8 +55,8 @@
     padding:10px 16px; border-radius:5px; border:1.5px solid var(--brass);
     background:transparent; color:var(--text-light); font-family:'Inter', sans-serif; font-weight:600; font-size:13.5px; cursor:pointer;
   }
-  .btn:hover{ background:rgba(179,130,63,0.18); }
-  .btn.solid{ background:var(--brass); color:#1c150c; }
+  .btn:hover{ background:rgba(127,178,229,0.2); }
+  .btn.solid{ background:var(--brass); color:var(--on-accent); }
   .btn.solid:hover{ filter:brightness(1.1); background:var(--brass); }
   .btn:disabled{ opacity:0.4; cursor:not-allowed; }
 
@@ -60,7 +65,7 @@
     flex:1; padding:10px; border-radius:5px; border:1.5px solid var(--brass);
     background:transparent; color:var(--text-light); font-family:'Inter', sans-serif; font-weight:600; font-size:13.5px; cursor:pointer;
   }
-  .mode-btn.active{ background:var(--brass); color:#1c150c; }
+  .mode-btn.active{ background:var(--brass); color:var(--on-accent); }
 
   .toggle-row{
     display:flex; align-items:center; gap:10px; margin:10px 0 4px;
@@ -72,7 +77,7 @@
   .draw-btn{
     display:block; width:100%; margin-top:14px; padding:16px;
     background:linear-gradient(135deg, var(--brass-bright), var(--brass));
-    color:#1c150c; font-family:'Cinzel', serif; font-weight:700; font-size:15px;
+    color:var(--on-accent); font-family:'Cinzel', serif; font-weight:700; font-size:15px;
     letter-spacing:0.04em; text-transform:uppercase; border:none; border-radius:5px; cursor:pointer;
   }
   .draw-btn:hover{ filter:brightness(1.1); }
@@ -95,8 +100,8 @@
   }
   .card-front{
     background:
-      repeating-linear-gradient(45deg, rgba(243,236,217,0.05) 0 10px, transparent 10px 20px),
-      linear-gradient(135deg, var(--ink-2), #2a231b);
+      repeating-linear-gradient(45deg, rgba(230,237,247,0.05) 0 10px, transparent 10px 20px),
+      linear-gradient(135deg, var(--ink-2), #1a2740);
     border:2px solid var(--brass); font-family:'Cinzel', serif; font-size:34px; color:var(--brass-bright);
   }
   .card-back{
@@ -111,8 +116,8 @@
   .slot-window::before, .slot-window::after{
     content:""; position:absolute; left:0; right:0; height:60px; z-index:2; pointer-events:none;
   }
-  .slot-window::before{ top:0; background:linear-gradient(var(--sand), rgba(233,223,196,0)); }
-  .slot-window::after{ bottom:0; background:linear-gradient(rgba(233,223,196,0), var(--sand)); }
+  .slot-window::before{ top:0; background:linear-gradient(var(--sand), rgba(19,29,48,0)); }
+  .slot-window::after{ bottom:0; background:linear-gradient(rgba(19,29,48,0), var(--sand)); }
   .slot-highlight{
     position:absolute; top:60px; left:0; right:0; height:60px;
     border-top:1.5px dashed var(--brass); border-bottom:1.5px dashed var(--brass);
@@ -141,12 +146,12 @@
   }
   .pool-chip{
     font-size:12.5px; padding:5px 10px; border-radius:20px;
-    background:rgba(224,171,99,0.14); border:1px solid var(--brass);
+    background:rgba(127,178,229,0.14); border:1px solid var(--brass);
     color:var(--text-light);
   }
   .pool-chip.drawn{
     text-decoration:line-through; color:var(--removed); border-color:var(--removed);
-    background:rgba(138,122,88,0.08);
+    background:rgba(132,150,176,0.1);
   }
   .empty-note{ font-size:13px; color:var(--text-muted); font-style:italic; }
 
