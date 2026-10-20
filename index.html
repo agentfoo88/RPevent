@@ -3,32 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rogue Pleasures — Event Generator</title>
+<meta name="color-scheme" content="dark">
+<title>The Restless Pale — Event Generator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#141110;
-    --ink-2:#1c1815;
-    --sand:#e9dfc4;
-    --text-dark:#241d13;
-    --text-light:#f3ecd9;
-    --text-muted:#c3b797;
-    --brass:#b3823f;
-    --brass-bright:#e0ab63;
-    --order:#7387b3;
-    --knowledge:#a06fa3;
-    --freedom:#c98a5e;
-    --combat:#c15a5a;
-    --action:#b39a4d;
-    --social:#5c9a86;
-    --line:rgba(243,236,217,0.14);
+    color-scheme:dark;
+    --ink:#0b111c;
+    --ink-2:#111a2b;
+    --field:#0d1524;
+    --card:#131d30;
+    --text-light:#e6edf7;
+    --text-muted:#9fb0c8;
+    --label:#8fb4e0;
+    --accent:#7fb2e5;
+    --accent-bright:#a5cdf5;
+    --accent-deep:#5a8cc2;
+    --on-accent:#0a1220;
+    --order:#8fa3d1;
+    --knowledge:#b58bd0;
+    --freedom:#e0a070;
+    --combat:#e07a7a;
+    --action:#d4bd5e;
+    --social:#6fc4aa;
+    --ok:#7fd1b0;
+    --warn:#e0c76a;
+    --bad:#f09090;
+    --line:rgba(159,176,200,0.22);
     --focus:#ffd77a;
   }
   *{box-sizing:border-box;}
   body{
     margin:0;
-    background:radial-gradient(ellipse at top, var(--ink-2), var(--ink) 70%);
+    background:radial-gradient(ellipse at top, #16233a, var(--ink) 70%);
     color:var(--text-light);
     font-family:'Inter', sans-serif;
     min-height:100vh;
@@ -41,7 +49,7 @@
     font-size:11px;
     letter-spacing:0.2em;
     text-transform:uppercase;
-    color:var(--brass-bright);
+    color:var(--accent-bright);
     margin-bottom:8px;
   }
   h1{
@@ -59,7 +67,7 @@
     line-height:1.6;
   }
 
-  a{ color:var(--brass-bright); }
+  a{ color:var(--accent-bright); }
   a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible, [tabindex]:focus-visible{
     outline:3px solid var(--focus);
     outline-offset:2px;
@@ -72,7 +80,7 @@
     gap:12px;
     margin:24px 0 10px;
     padding:16px;
-    background:rgba(255,255,255,0.04);
+    background:rgba(127,178,229,0.05);
     border:1px solid var(--line);
     border-radius:6px;
   }
@@ -91,8 +99,8 @@
     color:var(--text-muted);
   }
   .ctrl select{
-    background:var(--ink-2);
-    border:1.5px solid var(--brass);
+    background:var(--field);
+    border:1.5px solid var(--accent-deep);
     border-radius:4px;
     color:var(--text-light);
     padding:10px 10px;
@@ -100,7 +108,7 @@
     font-size:14px;
   }
   .ctrl select option{
-    background:var(--ink-2);
+    background:var(--field);
     color:var(--text-light);
   }
 
@@ -110,8 +118,8 @@
     gap:10px;
     margin:0 0 16px;
     padding:12px 16px;
-    background:rgba(193,90,90,0.1);
-    border:1px solid rgba(193,90,90,0.4);
+    background:rgba(224,122,122,0.1);
+    border:1px solid rgba(224,122,122,0.5);
     border-radius:6px;
   }
   .preset-row input[type="checkbox"]{
@@ -126,15 +134,15 @@
   }
   .preset-row .preset-title{ font-weight:600; }
   .preset-row .preset-desc{ display:block; font-size:12px; color:var(--text-muted); margin-top:2px; }
-  .preset-row.disabled{ opacity:0.5; }
+  .preset-row.disabled{ opacity:0.6; }
 
   .roll-btn{
     display:block;
     width:100%;
     margin-top:4px;
     padding:16px;
-    background:linear-gradient(135deg, var(--brass-bright), var(--brass));
-    color:#1c150c;
+    background:linear-gradient(135deg, var(--accent-bright), var(--accent));
+    color:var(--on-accent);
     font-family:'Cinzel', serif;
     font-weight:700;
     font-size:15px;
@@ -151,19 +159,19 @@
   /* Main card */
   .card{
     background:
-      linear-gradient(var(--sand), var(--sand)) padding-box,
-      linear-gradient(135deg, var(--brass), var(--ink-2)) border-box;
+      linear-gradient(var(--card), var(--card)) padding-box,
+      linear-gradient(135deg, var(--accent-deep), var(--ink-2)) border-box;
     border:1px solid transparent;
     border-radius:6px;
     padding:6px 22px 24px;
-    color:var(--text-dark);
-    box-shadow:0 20px 44px -20px rgba(0,0,0,0.65);
+    color:var(--text-light);
+    box-shadow:0 20px 44px -20px rgba(0,0,0,0.8);
     margin-top:22px;
   }
 
   .phase{
     padding:16px 0;
-    border-bottom:1px dashed rgba(36,29,19,0.22);
+    border-bottom:1px dashed var(--line);
   }
   .phase:last-of-type{ border-bottom:none; }
   .phase-head{
@@ -184,8 +192,8 @@
     font-family:'IBM Plex Mono', monospace;
     font-size:11px;
     letter-spacing:0.06em;
-    color:#5d4d30;
-    background:rgba(179,130,63,0.16);
+    color:var(--accent-bright);
+    background:rgba(127,178,229,0.14);
     padding:3px 9px;
     border-radius:20px;
   }
@@ -203,11 +211,11 @@
     font-size:10px;
     letter-spacing:0.12em;
     text-transform:uppercase;
-    color:#5d4d30;
+    color:var(--label);
   }
   .field-note{
     font-size:11px;
-    color:#7a6a45;
+    color:var(--text-muted);
     font-style:italic;
   }
   .field-val{ font-size:14.5px; line-height:1.55; }
@@ -215,22 +223,23 @@
   .field-val li{ margin-bottom:3px; }
   .field-val input[type="text"]{
     width:100%;
-    border:1.5px solid rgba(36,29,19,0.35);
+    border:1.5px solid var(--accent-deep);
     border-radius:4px;
     padding:8px 10px;
     font-family:'Inter', sans-serif;
     font-size:14px;
-    background:rgba(255,255,255,0.5);
-    color:var(--text-dark);
+    background:var(--field);
+    color:var(--text-light);
   }
+  input::placeholder{ color:#8496b0; opacity:1; }
 
   .die-btn{
     flex:none;
     width:30px; height:30px;
     border-radius:50%;
-    border:1.5px solid var(--brass);
-    background:rgba(179,130,63,0.08);
-    color:#6d4e17;
+    border:1.5px solid var(--accent-deep);
+    background:rgba(127,178,229,0.08);
+    color:var(--accent-bright);
     font-size:14px;
     cursor:pointer;
     display:flex;
@@ -238,7 +247,7 @@
     justify-content:center;
     transition:transform 0.2s ease, background 0.2s ease;
   }
-  .die-btn:hover{ background:rgba(184,135,79,0.22); }
+  .die-btn:hover{ background:rgba(127,178,229,0.22); }
   .die-btn:active{ transform:rotate(20deg) scale(0.95); }
   .die-btn[hidden]{ display:none; }
 
@@ -249,8 +258,8 @@
   .setup-preview{
     margin-top:8px;
     padding:10px 12px;
-    background:rgba(255,255,255,0.35);
-    border:1px dashed rgba(36,29,19,0.3);
+    background:rgba(127,178,229,0.08);
+    border:1px dashed var(--accent-deep);
     border-radius:4px;
     font-family:'Cinzel', serif;
     font-size:14.5px;
@@ -258,8 +267,8 @@
   }
 
   .announce{
-    background:rgba(224,171,99,0.12);
-    border:1.5px solid var(--brass);
+    background:rgba(127,178,229,0.08);
+    border:1.5px solid var(--accent-deep);
     border-radius:6px;
     padding:18px;
     margin-top:6px;
@@ -273,9 +282,9 @@
     text-transform:uppercase;
     padding:4px 10px;
     border-radius:20px;
-    background:rgba(255,255,255,0.4);
+    background:rgba(255,255,255,0.06);
     border:1.5px solid;
-    color:var(--text-dark);
+    color:var(--text-light);
   }
   .announce-text{ font-family:'Cinzel', serif; font-size:18.5px; line-height:1.6; margin-bottom:14px; }
   .start-time-field{ display:flex; align-items:center; gap:8px; margin-top:10px; }
@@ -284,19 +293,19 @@
     font-size:10.5px;
     letter-spacing:0.1em;
     text-transform:uppercase;
-    color:#5d4d30;
+    color:var(--label);
   }
   .start-time-field input{
     flex:1;
-    border:1.5px solid rgba(36,29,19,0.35);
+    border:1.5px solid var(--accent-deep);
     border-radius:4px;
     padding:9px 10px;
     font-family:'Inter', sans-serif;
     font-size:14px;
-    background:rgba(255,255,255,0.5);
-    color:var(--text-dark);
+    background:var(--field);
+    color:var(--text-light);
   }
-  .meta-line{ font-family:'IBM Plex Mono', monospace; font-size:12.5px; color:#5d4d30; margin-top:10px; }
+  .meta-line{ font-family:'IBM Plex Mono', monospace; font-size:12.5px; color:var(--label); margin-top:10px; }
 
   .copy-btn{
     display:block;
@@ -304,8 +313,8 @@
     margin-top:14px;
     padding:12px;
     background:transparent;
-    border:1.5px solid var(--text-dark);
-    color:var(--text-dark);
+    border:1.5px solid var(--accent);
+    color:var(--accent-bright);
     font-family:'Inter', sans-serif;
     font-weight:600;
     font-size:13.5px;
@@ -313,12 +322,12 @@
     cursor:pointer;
     transition:background 0.2s ease, color 0.2s ease;
   }
-  .copy-btn:hover{ background:var(--text-dark); color:var(--sand); }
+  .copy-btn:hover{ background:var(--accent); color:var(--on-accent); }
   .copy-confirm{
     text-align:center;
     font-family:'IBM Plex Mono', monospace;
     font-size:11.5px;
-    color:#2e5c4c;
+    color:var(--ok);
     margin-top:6px;
     min-height:16px;
   }
@@ -337,7 +346,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Rogue Pleasures — Staff Tool</div>
+    <div class="eyebrow">The Restless Pale — Staff Tool</div>
     <h1>One-Shot Event Generator</h1>
     <p class="sub">Roll a full mini-event outline, laid out in the order you'll actually run it. Reroll any single field if a combination doesn't land. The Announcement is at the bottom, ready to copy into Discord.</p>
   </header>
@@ -376,7 +385,7 @@
   <div class="preset-row" id="presetRow">
     <input type="checkbox" id="demolition">
     <label for="demolition">
-      <span class="preset-title">Build Demolition preset (Combat only)</span>
+      <span class="preset-title">Build Demolition preset (sets Event Type to Combat)</span>
       <span class="preset-desc">Location becomes manual entry, Reward locks to wreckage loot, Branches are flavor only — the build comes down regardless.</span>
     </label>
   </div>
@@ -408,7 +417,7 @@
         <div class="field-head"><span class="field-cat" id="locationLabel">Location</span><button class="die-btn" data-key="location" id="locationDie" aria-label="Reroll location">🎲</button></div>
         <div class="field-val" id="h_location"></div>
         <div class="field-val" id="h_locationManual" style="display:none;">
-          <input type="text" id="locationManualInput" placeholder="Type the build's actual location">
+          <input type="text" id="locationManualInput" placeholder="Type the build's actual location" aria-label="Build location">
         </div>
       </div>
       <div class="field">
@@ -501,7 +510,7 @@ const FACTION_META = {
   order:     { name:"Khas Khemi (Order)", color:"var(--order)" },
   knowledge: { name:"Sepermeru (Knowledge)", color:"var(--knowledge)" },
   freedom:   { name:"New Tantula (Freedom)", color:"var(--freedom)" },
-  generic:   { name:"Unaligned", color:"var(--brass)" }
+  generic:   { name:"Unaligned", color:"var(--accent)" }
 };
 const BUCKET_META = {
   social:  { name:"Social", color:"var(--social)", tail:"Be prepared for intrigue and conversation.", castSize:3 },
@@ -732,7 +741,10 @@ function rollItem(){
 
 function rollAll(){
   state.faction = resolveFaction();
-  state.bucket = resolveBucket();
+  state.bucket = document.getElementById('demolition').checked ? 'combat' : resolveBucket();
+  if(state.bucket === 'combat' && document.getElementById('demolition').checked){
+    document.getElementById('bucket').value = 'combat';
+  }
   state.duration = resolveDuration();
   state.trigger = pick(TRIGGER[state.faction]);
   state.stakes = pick(STAKES);
@@ -798,8 +810,7 @@ function render(){
 
   // Preset row enable/disable
   const presetRow = document.getElementById('presetRow');
-  presetRow.classList.toggle('disabled', state.bucket !== 'combat');
-  document.getElementById('demolition').disabled = state.bucket !== 'combat';
+  presetRow.classList.remove('disabled');
 
   // Announcement
   document.getElementById('publicBadges').innerHTML = `
@@ -838,9 +849,9 @@ function render(){
   // Resolution
   document.getElementById('branchNote').style.display = demo ? '' : 'none';
   document.getElementById('h_branch').innerHTML = `
-    <div class="branch-row"><span class="branch-tag" style="color:#2e5c4c;">Success</span>${state.branch.success}</div>
-    <div class="branch-row"><span class="branch-tag" style="color:#6d5a1c;">Partial</span>${state.branch.partial}</div>
-    <div class="branch-row"><span class="branch-tag" style="color:#7a2e2e;">Failure</span>${state.branch.failure}</div>
+    <div class="branch-row"><span class="branch-tag" style="color:var(--ok);">Success</span>${state.branch.success}</div>
+    <div class="branch-row"><span class="branch-tag" style="color:var(--warn);">Partial</span>${state.branch.partial}</div>
+    <div class="branch-row"><span class="branch-tag" style="color:var(--bad);">Failure</span>${state.branch.failure}</div>
   `;
 
   // Wrap-up
